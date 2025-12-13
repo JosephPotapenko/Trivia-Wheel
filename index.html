@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Winter One-derland</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Baloo+2:wght@700;800&family=Chewy&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#b6e1fccb;
+      --muted:#e7edf5;
+    --text:#398fc4;
+    --text-shadow: 0 0 100px rgb(27, 72, 77);
+      --sub:#22667b;
+      --accent:#ffffff; /* winter blue */
+      --accent-2:#4fb3ff; /* ice blue */
+      --ok:#2fbf71;
+      --bad:#e15757;
+      --border:#002c5c;
+    }
+    html,body{height:100%;margin:0;font-family:'Baloo 2', Inter, system-ui, Arial;
+      background-image:url('105.jpg');
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      color:var(--text);
+    }
+    body{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px}
+
+    /* Header */
+    header{width:min(1100px,96%);display:flex;align-items:center;justify-content:space-between;margin:0;padding:0}
+    .title{font-weight:900;letter-spacing:-0.02em;font-size:clamp(22px,4vw,32px)}
+    .sub{color:var(--sub);font-weight:600}
+    .actions{display:flex;gap:6px;margin-left:auto;justify-content:flex-end}
+    .btn{appearance:none;border:none;border-radius:10px;padding:10px 14px;font-weight:800;color:#ffffff;background:var(--accent);cursor:pointer}
+    .btn.secondary{background:var(--muted);color:var(--text);border:1px solid var(--border)}
+    /* Spin button enhancements */
+    #spinBtn{min-width:320px;width:60%;max-width:520px;padding:14px 28px;border-radius:12px;position:relative;overflow:hidden}
+    #spinBtn::before{content:"";position:absolute;inset:-2px;border-radius:14px;box-shadow:0 0 22px 6px rgba(110, 192, 255, 0.35);pointer-events:none}
+    #spinBtn{
+      background:linear-gradient(180deg,#eaf6ff,#d8f0ff);
+      color:#0b3a5c;
+    }
+    /* Animated hue for spin label */
+    #spinBtn span{
+      background:linear-gradient(90deg,#2d7dd2,#4fb3ff,#2d7dd2);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      animation: hueShift 3s linear infinite;
+      display:inline-block; font-weight:800;
+    }
+    @keyframes hueShift{
+      0%{filter:hue-rotate(0deg)}
+      50%{filter:hue-rotate(45deg)}
+      100%{filter:hue-rotate(0deg)}
+    }
+
+    /* Board */
+    .board-wrap{width:min(950px,96%);margin-top:0;overflow:visible}
+    .board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;background:linear-gradient(180deg,#abf1ff,hsl(190, 100%, 88%));padding:16px;border-radius:16px;border:1px solid var(--border)}
+    .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;border-radius:12px;background:linear-gradient(180deg,#ffffff,#f3f8ff);border:1px solid var(--border);cursor:pointer;transition:transform .12s ease, border-color .12s ease, opacity .2s}
+    .tile:hover{transform:translateY(-2px);border-color:#a6d5ff}
+    .tile.disabled{opacity:.4;cursor:not-allowed}
+    .tile .label{font-family:"Baloo 2", cursive;font-weight:800}
+    .tile .points{font-family:"Baloo 2", cursive;color:var(--sub);font-weight:800}
+
+    /* Overlay card */
+    .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.65);backdrop-filter:saturate(110%) blur(6px);z-index:20}
+    .card{width:min(760px,92vw);background:linear-gradient(180deg,#ffffff,#f6fbff);border:1px solid var(--border);border-radius:16px;box-shadow:0 30px 100px rgba(23,43,77,.12);padding:20px;display:flex;flex-direction:column;gap:12px}
+    .turn{color:var(--sub);font-weight:700}
+    .qtext{font-family:"Baloo 2", cursive;font-size:22px;font-weight:800}
+    .atext{font-family:"Baloo 2", cursive;font-size:20px;font-weight:800;color:var(--accent-2);display:none}
+    .atext.show{display:block}
+    .controls{display:flex;gap:8px;justify-content:flex-end}
+    .btn.ghost{background:transparent;border:1px solid #55a7ff;color:var(--text)}
+    .btn.ok{background:var(--ok)}
+    .btn.bad{background:var(--bad)}
+
+    /* Teams */
+    .teams{width:min(1000px,96%);display:flex;gap:15px}
+    .team{flex:1;background:linear-gradient(180deg,#ffffff,#7be0ff);border:1px solid var(--border);border-radius:12px;padding:12px}
+      .teams{width:min(1000px,96%);display:flex;gap:14px;margin-top:18px}
+      .team{flex:1;background:linear-gradient(180deg,#ffffff,#7be0ff);border:1px solid var(--border);border-radius:10px;padding:8px}
+    .team h3{margin:0 0 6px 0;font-size:14px;color:var(--sub)}
+    .score{font-family:"Baloo 2", cursive;font-size:22px;font-weight:900;color:var(--accent);border-radius:8px;padding:4px 6px;cursor:text}
+    .team.current{outline:2px solid #ffffff}
+
+    /* Editor */
+    .editor{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1000px,96vw);max-height:86vh;overflow:auto;background:linear-gradient(180deg,#ffffff,#f6fbff);border:1px solid var(--border);border-radius:16px;padding:18px;display:none;z-index:30}
+    .editor h4{margin:0 0 10px 0;font-size:20px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+    .row input{background:#ffffff;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px}
+    .qa{display:flex;flex-direction:column;gap:10px}
+    .qa .item{display:grid;grid-template-columns:80px 1fr 1fr;gap:10px}
+    .qa textarea{background:#ffffff;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px;min-height:80px}
+
+    /* Wheel indicator arrow - on right side pointing to center */
+    .wheel-wrap::before{
+      content:"◀";
+      position:absolute;
+      top:50%;
+      right:5px;
+      transform:translateY(-50%);
+      font-size:36px;
+      color:var(--accent-2);
+      z-index:10;
+      font-weight:900;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="position:relative;display:flex;align-items:center;gap:0">
+      <img src="chatgpt.png" alt="Sticker" style="width:300px;height:300px;object-fit:contain;display:block;margin:0;padding:0;position:absolute;left:-160px;top:0;transform:translateY(-6px)" />
+    </div>
+    <div class="actions" style="transform:translateX(150px)">
+      <button class="btn secondary" id="editBtn">Edit</button>
+      <button class="btn secondary" id="startBtn">Start</button>
+    </div>
+  </header>
+
+  <div class="board-wrap">
+    <div class="wheel-wrap" style="display:flex;flex-direction:column;align-items:center;gap:0;margin-top:-20px;position:relative">
+        <div class="scene" style="width:min(720px,92vw);height:calc(min(720px,92vw) - 24px);perspective:1200px;position:relative;margin:0;padding:0">
+        <div class="cylinder" id="wheel" style="width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 2.8s cubic-bezier(.08,.9,.18,1)"></div>
+        <!-- Spin button overlayed just under the wheel -->
+        <div class="spin-cta" style="position:absolute;left:50%;transform:translateX(-50%);bottom:-12px;z-index:15;display:flex;justify-content:center;width:100%">
+          <button class="btn secondary" id="spinBtn"><span>Spin</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="board" id="board" style="display:none"></div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="card">
+      <div class="turn" id="turnLabel">Team 1 — $100</div>
+      <div style="font-size:14px;color:var(--sub);margin-bottom:8px" id="questionNumber">Question 1</div>
+      <div class="qtext" id="qText">Question</div>
+      <div class="atext" id="aText">Answer</div>
+      <div class="row">
+        <input id="manualPoints" type="number" placeholder="Points" style="width:140px" />
+        <div style="flex:1"></div>
+        <div class="controls">
+          <button class="btn ghost" id="closeCard">Close</button>
+          <button class="btn ghost" id="revealBtn">Reveal</button>
+          <button class="btn ok" id="correctBtn" disabled>Correct</button>
+          <button class="btn bad" id="wrongBtn" disabled>Wrong</button>
+        </div>
+      </div>
+      <div id="stealWrap" style="display:none;gap:8px" class="row"></div>
+    </div>
+  </div>
+
+  <div class="teams" id="teams"></div>
+
+  <!-- Audio -->
+  <audio id="backtrack1" src="assets/backtrack1.mp4" preload="auto"></audio>
+  <audio id="backtrack2" src="assets/backtrack2.mp4" preload="auto"></audio>
+  <audio id="backtrack3" src="assets/backtrack3.mp4" preload="auto"></audio>
+  <audio id="sfx-tick" src="assets/spin-tick.mp3" preload="auto"></audio>
+
+  <script>
+    /* State */
+    let defaultPoints = 100;
+    let questionCount = 15;
+    let teamCount = 4;
+    let currentTeam = 0;
+    let scores = new Array(teamCount).fill(0);
+    let activeIndex = null;
+    const qa = {};
+    for(let i=1;i<=40;i++){ qa['t'+i] = { q: 'Question ' + i, a: 'Answer ' + i, used: false }; }
+
+    /* Elements */
+    const board = document.getElementById('board');
+    const overlay = document.getElementById('overlay');
+    const turnLabel = document.getElementById('turnLabel');
+    const qText = document.getElementById('qText');
+    const aText = document.getElementById('aText');
+    const revealBtn = document.getElementById('revealBtn');
+    const correctBtn = document.getElementById('correctBtn');
+    const wrongBtn = document.getElementById('wrongBtn');
+    const closeCard = document.getElementById('closeCard');
+    const manualPoints = document.getElementById('manualPoints');
+    const teamsWrap = document.getElementById('teams');
+    const stealWrap = document.getElementById('stealWrap');
+    const editBtn = document.getElementById('editBtn');
+    const startBtn = document.getElementById('startBtn');
+    const spinBtn = document.getElementById('spinBtn');
+    const questionNumber = document.getElementById('questionNumber');
+
+    const backtrack1 = document.getElementById('backtrack1');
+    const backtrack2 = document.getElementById('backtrack2');
+    const backtrack3 = document.getElementById('backtrack3');
+    const sfxTick = document.getElementById('sfx-tick');
+
+    /* Build wheel */
+    function buildWheel(){
+      const wheel = document.getElementById('wheel');
+      if(!wheel) return;
+      wheel.innerHTML='';
+      const step = 360 / questionCount;
+      const size = Math.min(720, Math.floor(window.innerWidth*0.92));
+      const radius = Math.round(size * 0.33);
+      // Compute band height from cylinder circumference so bands touch edge-to-edge
+      const bandHeight = Math.max(24, Math.round((2 * Math.PI * radius) / questionCount));
+      for(let i=1;i<=questionCount;i++){
+        const face = document.createElement('div');
+        const used = qa['t'+i].used;
+        face.textContent = `Question ${i}`;
+        face.style.cssText = `position:absolute;left:50%;top:50%;width:92%;height:${bandHeight}px;margin:-${Math.round(bandHeight/2)}px 0 0 -46%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;border-radius:8px;background:${used?'#f2f7fc':'#ffffff'};border:1px solid var(--border);color:${used?'#9fb2c6':'#0b1b2b'};box-shadow:${used?'none':'0 6px 16px rgba(23,43,77,.08)'};transform:rotateX(${(i-1)*step}deg) translateZ(${radius}px)`;
+        wheel.appendChild(face);
+      }
+    }
+
+    /* Build board */
+    function renderBoard(){
+      board.innerHTML='';
+      for(let i=1;i<=questionCount;i++){
+        const t = document.createElement('div');
+        t.className = 'tile' + (qa['t'+i].used ? ' disabled' : '');
+        t.dataset.id = 't'+i;
+        t.innerHTML = `<div class="label">Question ${i}</div><div class="points">$${defaultPoints}</div>`;
+        t.onclick = ()=>{ if(qa['t'+i].used) return; openCard(i); };
+        board.appendChild(t);
+      }
+    }
+
+    /* View toggle removed: always show wheel */
+
+    /* Audio context for instant tick sound */
+    let audioCtx = null;
+    function playTickTone() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = 800;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } catch (e) {}
+    }
+
+    function spin(){
+      // Play tick tone with zero latency via Web Audio API
+      playTickTone();
+      const available = [];
+      for(let i=1;i<=questionCount;i++){ if(!qa['t'+i].used) available.push(i); }
+      if(!available.length){ alert('No questions left'); return; }
+      const targetIdx = available[Math.floor(Math.random()*available.length)];
+      const step = 360 / questionCount;
+      const spins = 4 * 360;
+      const wheel = document.getElementById('wheel');
+      if(!wheel) return;
+      const current = (parseFloat(wheel.dataset.rot)||0);
+      // Calculate target so the question lands at the top (0 degrees aligned with arrow)
+      const target = current + spins + ((targetIdx-1)*step);
+      const start = current;
+      const duration = 2800;
+      const startTime = performance.now();
+      function easeOut(t){ return 1 - Math.pow(1-t, 3); }
+      let prevTick = Math.floor(start / step);
+      function animate(now){
+        const t = Math.min((now-startTime)/duration,1);
+        const rot = start + (target-start)*easeOut(t);
+        wheel.style.transform = `rotateX(-${rot}deg)`;
+        wheel.dataset.rot = String(rot);
+        const curTick = Math.floor(rot / step);
+        if(curTick > prevTick){
+          prevTick = curTick;
+          playTickTone();
+        }
+        if(t<1) requestAnimationFrame(animate); else finishSpin(targetIdx);
+      }
+      requestAnimationFrame(animate);
+    }
+    function finishSpin(targetIdx){ 
+      const wheel = document.getElementById('wheel');
+      const rot = parseFloat(wheel.dataset.rot) || 0;
+      const step = 360 / questionCount;
+      // Calculate which question is actually facing the camera (center-right)
+      const normalizedRot = ((rot % 360) + 360) % 360;
+      const faceIdx = Math.round(normalizedRot / step) % questionCount;
+      const selectedIdx = (faceIdx % questionCount) + 1;
+      
+      // If it's already used, continue spinning to next available
+      if(qa['t'+selectedIdx].used){
+        const current = rot;
+        
+        // Find next available question after current landing
+        let next = selectedIdx;
+        for(let attempt = 0; attempt < questionCount; attempt++){
+          next = (next % questionCount) + 1;
+          if(!qa['t'+next].used) break;
+        }
+        
+        // Spin to the next available question
+        const target = current + step + ((next-1)*step);
+        const start = current;
+        const duration = 800;
+        const startTime = performance.now();
+        function easeOut(t){ return 1 - Math.pow(1-t, 3); }
+        function animate(now){
+          const t = Math.min((now-startTime)/duration,1);
+          const newRot = start + (target-start)*easeOut(t);
+          wheel.style.transform = `rotateX(-${newRot}deg)`;
+          wheel.dataset.rot = String(newRot);
+          if(t<1) requestAnimationFrame(animate); else finishSpin(next);
+        }
+        requestAnimationFrame(animate);
+        return;
+      }
+      openCard(selectedIdx); 
+    }
+    if(spinBtn){ spinBtn.onclick = spin; }
+
+    /* Start button: play three backtracks in a row, then loop the third */
+    function startBacktracks(){
+      if(!backtrack1 || !backtrack2 || !backtrack3) return;
+      try{
+        // Stop all and reset
+        [backtrack1, backtrack2, backtrack3].forEach(a=>{ 
+          a.pause(); 
+          a.currentTime = 0; 
+          a.loop = false;
+          a.onended = null;
+          a.onerror = null;
+        });
+        
+        // Set volumes
+        backtrack1.volume = 0.9; 
+        backtrack2.volume = 0.9; 
+        backtrack3.volume = 0.9;
+        
+        // Set up chain: backtrack1 → backtrack2
+        backtrack1.onended = ()=>{
+          backtrack2.currentTime = 0;
+          backtrack2.play().catch(e => console.error('bt2 play failed:', e));
+        };
+        
+        // Set up chain: backtrack2 → backtrack3 (loop)
+        backtrack2.onended = ()=>{
+          backtrack3.currentTime = 0; 
+          backtrack3.loop = true;
+          backtrack3.play().catch(e => console.error('bt3 play failed:', e));
+        };
+        
+        // Safety: if backtrack1 fails, jump to backtrack3
+        backtrack1.onerror = ()=>{
+          backtrack3.currentTime = 0; 
+          backtrack3.loop = true; 
+          backtrack3.play().catch(e => {});
+        };
+        backtrack2.onerror = ()=>{
+          backtrack3.currentTime = 0; 
+          backtrack3.loop = true; 
+          backtrack3.play().catch(e => {});
+        };
+        
+        // Start playback
+        backtrack1.currentTime = 0;
+        backtrack1.play().catch(e => {
+          console.error('bt1 play failed:', e);
+          // Try backtrack3 as fallback
+          backtrack3.currentTime = 0; 
+          backtrack3.loop = true; 
+          backtrack3.play().catch(e => {});
+        });
+      }catch(e){ 
+        console.error('startBacktracks error:', e);
+        try{ backtrack3.currentTime = 0; backtrack3.loop = true; backtrack3.play(); }catch(_){} 
+      }
+    }
+    if(startBtn){ startBtn.onclick = startBacktracks; }
+
+    /* Teams */
+    function renderTeams(){
+      teamsWrap.innerHTML='';
+      for(let i=0;i<teamCount;i++){
+        const team = document.createElement('div');
+        team.className = 'team' + (i===currentTeam ? ' current' : '');
+        team.innerHTML = `<h3>Team ${i+1}</h3><div class="score" contenteditable="true" id="score${i}">$${scores[i]}</div>`;
+        teamsWrap.appendChild(team);
+      }
+      Array.from(document.querySelectorAll('.score')).forEach((el, idx)=>{
+        el.addEventListener('blur', ()=>{
+          const num = parseInt(el.textContent.replace(/[^0-9-]/g,''), 10);
+          scores[idx] = isNaN(num) ? scores[idx] : num;
+          el.textContent = '$' + scores[idx];
+        });
+        el.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); el.blur(); } });
+      });
+      updateTurnLabel();
+    }
+
+    function nextTeam(){
+      currentTeam = (currentTeam + 1) % teamCount;
+      renderTeams();
+    }
+
+    function updateTurnLabel(){
+      turnLabel.textContent = `Team ${currentTeam+1} — $${defaultPoints}`;
+    }
+
+    /* Card flow */
+    function openCard(i){
+      activeIndex = i;
+      qText.textContent = qa['t'+i].q;
+      aText.textContent = qa['t'+i].a;
+      aText.classList.remove('show');
+      revealBtn.disabled = false;
+      correctBtn.disabled = true;
+      wrongBtn.disabled = true;
+      manualPoints.value = '';
+      if(questionNumber) questionNumber.textContent = `Question ${i}`;
+      overlay.style.display = 'flex';
+    }
+    function closeOverlay(){ overlay.style.display = 'none'; activeIndex=null; }
+    closeCard.onclick = closeOverlay;
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay.style.display==='flex') closeOverlay(); });
+
+    revealBtn.onclick = ()=>{ aText.classList.add('show'); revealBtn.disabled=true; correctBtn.disabled=false; wrongBtn.disabled=false; };
+    correctBtn.onclick = ()=>{
+      let pts = Number(manualPoints.value);
+      if(!pts || isNaN(pts) || pts <= 0) pts = defaultPoints;
+      scores[currentTeam] += pts;
+      qa['t'+activeIndex].used = true;
+      playCorrect();
+      renderTeams();
+      renderBoard();
+      buildWheel();
+      closeOverlay();
+      nextTeam();
+      checkGameEnd();
+    };
+    wrongBtn.onclick = ()=>{
+      playWrong();
+      stealWrap.style.display = 'flex';
+      stealWrap.innerHTML = '';
+      for(let i=0;i<teamCount;i++){
+        if(i===currentTeam) continue;
+        const b = document.createElement('button');
+        b.className = 'btn secondary';
+        b.textContent = `Team ${i+1} steals`;
+        b.onclick = ()=>{
+          let pts = Number(manualPoints.value);
+          if(!pts || isNaN(pts) || pts <= 0) pts = defaultPoints;
+          scores[i] += Math.round(pts/2);
+          qa['t'+activeIndex].used = true;
+          renderTeams();
+          renderBoard();
+          buildWheel();
+          closeOverlay();
+          nextTeam();
+          checkGameEnd();
+        };
+        stealWrap.appendChild(b);
+      }
+      const none = document.createElement('button');
+      none.className = 'btn ghost';
+      none.textContent = 'Not stolen';
+      none.onclick = ()=>{ qa['t'+activeIndex].used=true; renderBoard(); buildWheel(); closeOverlay(); nextTeam(); checkGameEnd(); };
+      stealWrap.appendChild(none);
+    };
+
+    /* Game end detection and confetti */
+    function allQuestionsUsed(){
+      for(let i=1;i<=questionCount;i++){
+        if(!qa['t'+i].used) return false;
+      }
+      return true;
+    }
+    
+    function playConfetti(){
+      const confettiPieces = 80;
+      for(let i=0;i<confettiPieces;i++){
+        const piece = document.createElement('div');
+        piece.style.cssText = `
+          position:fixed;
+          left:${Math.random()*window.innerWidth}px;
+          top:-10px;
+          width:${5+Math.random()*10}px;
+          height:${5+Math.random()*10}px;
+          background:${['#4fb3ff','#2fbf71','#e15757','#f4f7fb'][Math.floor(Math.random()*4)]};
+          opacity:1;
+          pointer-events:none;
+          z-index:999;
+          border-radius:50%;
+          animation:fall ${2+Math.random()*2}s linear forwards;
+        `;
+        document.body.appendChild(piece);
+        setTimeout(()=>piece.remove(), 4000);
+      }
+    }
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fall {
+        to {
+          transform: translateY(${window.innerHeight+100}px) rotate(360deg);
+          opacity:0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    function showWinner(){
+      const winnerTeam = scores.reduce((maxIdx, score, idx, arr)=> score > arr[maxIdx] ? idx : maxIdx, 0);
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position:fixed;
+        inset:0;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:rgba(0,0,0,0.7);
+        z-index:50;
+      `;
+      modal.innerHTML = `
+        <div style="background:linear-gradient(180deg,#ffffff,#f6fbff);border:2px solid var(--accent-2);border-radius:24px;padding:40px;text-align:center;box-shadow:0 30px 100px rgba(23,43,77,.3)">
+          <div style="font-family:'Chewy',cursive;font-size:48px;color:var(--accent-2);margin-bottom:20px">🎉</div>
+          <div style="font-family:'Baloo 2',cursive;font-size:36px;font-weight:900;color:var(--text);margin-bottom:30px">Team ${winnerTeam+1} Wins!</div>
+          <div style="font-size:24px;color:var(--sub);margin-bottom:30px">Final Score: $${scores[winnerTeam]}</div>
+          <button class="btn" onclick="location.reload()" style="padding:12px 30px;font-size:16px">Play Again</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      playConfetti();
+    }
+    
+    function checkGameEnd(){
+      if(allQuestionsUsed()){
+        setTimeout(showWinner, 500);
+      }
+    }
+
+    /* Editor */
+    const editor = document.createElement('aside');
+    editor.className = 'editor';
+    editor.innerHTML = `
+      <h4>Edit Game</h4>
+      <div class="row">
+        <input id="titleEditor" type="text" value="Trivia" style="flex:1"/>
+        <input id="subtitleEditor" type="text" value="Minimal modern board" style="flex:1"/>
+        <button class="btn" id="applyTitle">Update</button>
+      </div>
+      <div class="row">
+        <input id="defaultPointsEditor" type="number" value="100" style="width:120px"/>
+        <input id="questionCountEditor" type="number" min="1" max="40" value="15" style="width:120px"/>
+        <input id="teamCountEditor" type="number" min="1" max="8" value="4" style="width:120px"/>
+        <button class="btn" id="applyConfig">Apply</button>
+      </div>
+      <div class="qa" id="qaList"></div>
+      <div class="row" style="justify-content:flex-end">
+        <button class="btn" id="saveQA">Save</button>
+        <button class="btn" id="saveAll" style="color:#89CFF0">Save All</button>
+        <button class="btn secondary" id="closeEditor">Close</button>
+      </div>
+    `;
+    document.body.appendChild(editor);
+
+    const qaList = editor.querySelector('#qaList');
+    const titleEditor = editor.querySelector('#titleEditor');
+    const subtitleEditor = editor.querySelector('#subtitleEditor');
+    const applyTitle = editor.querySelector('#applyTitle');
+    const defaultPointsEditor = editor.querySelector('#defaultPointsEditor');
+    const questionCountEditor = editor.querySelector('#questionCountEditor');
+    const teamCountEditor = editor.querySelector('#teamCountEditor');
+    const applyConfig = editor.querySelector('#applyConfig');
+    const saveQA = editor.querySelector('#saveQA');
+    const saveAll = editor.querySelector('#saveAll');
+    const closeEditor = editor.querySelector('#closeEditor');
+
+    function populateEditor(){
+      qaList.innerHTML='';
+      for(let i=1;i<=questionCount;i++){
+        const row = document.createElement('div'); row.className='item';
+        row.innerHTML = `<div>Q${i}</div><textarea class="q">${qa['t'+i].q}</textarea><textarea class="a">${qa['t'+i].a}</textarea>`;
+        row.dataset.id = 't'+i;
+        qaList.appendChild(row);
+      }
+    }
+    function toggleEditor(){
+      if(editor.style.display==='none' || editor.style.display===''){
+        defaultPointsEditor.value = String(defaultPoints);
+        questionCountEditor.value = String(questionCount);
+        teamCountEditor.value = String(teamCount);
+        populateEditor();
+        editor.style.display='block';
+      } else {
+        editor.style.display='none';
+      }
+    }
+    editBtn.onclick = toggleEditor;
+    closeEditor.onclick = ()=> editor.style.display='none';
+    applyTitle.onclick = ()=>{
+      try{
+        const tEl = document.getElementById('gameTitle');
+        const sEl = document.getElementById('gameSubtitle');
+        if(tEl) tEl.textContent = titleEditor.value || 'Trivia';
+        if(sEl) sEl.textContent = subtitleEditor.value || 'Minimal modern board';
+      }catch(e){}
+      // persist even if not displayed
+      try{ localStorage.setItem('twTitle', titleEditor.value||''); localStorage.setItem('twSubtitle', subtitleEditor.value||''); }catch(e){}
+    };
+    applyConfig.onclick = ()=>{
+      defaultPoints = Math.max(1, Number(defaultPointsEditor.value)||100);
+      questionCount = Math.min(40, Math.max(1, Number(questionCountEditor.value)||15));
+      const newTeamCount = Math.min(8, Math.max(1, Number(teamCountEditor.value)||4));
+      if(newTeamCount !== teamCount){
+        const old = scores.slice();
+        teamCount = newTeamCount;
+        scores = new Array(teamCount).fill(0);
+        for(let i=0;i<Math.min(old.length, scores.length); i++){ scores[i] = old[i]; }
+        if(currentTeam >= teamCount) currentTeam = 0;
+      }
+      renderTeams();
+      renderBoard();
+      buildWheel();
+      populateEditor();
+      persistState();
+    };
+    function persistState(){
+      try{
+        const cfg = { defaultPoints, questionCount, teamCount };
+        localStorage.setItem('twConfig', JSON.stringify(cfg));
+        const qaSave = {};
+        for(let i=1;i<=40;i++){
+          const key = 't'+i;
+          qaSave[key] = { q: qa[key].q, a: qa[key].a, used: !!qa[key].used };
+        }
+        localStorage.setItem('twQA', JSON.stringify(qaSave));
+      }catch(e){}
+    }
+    function loadState(){
+      try{
+        const cfgRaw = localStorage.getItem('twConfig');
+        if(cfgRaw){
+          const cfg = JSON.parse(cfgRaw);
+          if(typeof cfg.defaultPoints === 'number') defaultPoints = cfg.defaultPoints;
+          if(typeof cfg.questionCount === 'number') questionCount = Math.min(40, Math.max(1, cfg.questionCount));
+          if(typeof cfg.teamCount === 'number') teamCount = Math.min(8, Math.max(1, cfg.teamCount));
+          scores = new Array(teamCount).fill(0);
+          if(currentTeam >= teamCount) currentTeam = 0;
+        }
+        const qaRaw = localStorage.getItem('twQA');
+        if(qaRaw){
+          const saved = JSON.parse(qaRaw);
+          for(let i=1;i<=40;i++){
+            const key = 't'+i;
+            if(saved[key]){
+              qa[key].q = saved[key].q || qa[key].q;
+              qa[key].a = saved[key].a || qa[key].a;
+              qa[key].used = !!saved[key].used;
+            }
+          }
+        }
+        const t = localStorage.getItem('twTitle');
+        const s = localStorage.getItem('twSubtitle');
+        if(t){ try{ const el = document.getElementById('gameTitle'); if(el) el.textContent = t; }catch(e){} }
+        if(s){ try{ const el = document.getElementById('gameSubtitle'); if(el) el.textContent = s; }catch(e){} }
+      }catch(e){}
+    }
+    saveQA.onclick = ()=>{
+      Array.from(qaList.children).forEach(row=>{
+        const id = row.dataset.id;
+        const q = row.querySelector('.q').value.trim();
+        const a = row.querySelector('.a').value.trim();
+        qa[id].q = q || qa[id].q;
+        qa[id].a = a || qa[id].a;
+      });
+      persistState();
+      editor.style.display='none';
+    };
+    if(saveAll){
+      saveAll.onclick = ()=>{
+        // apply config
+        defaultPoints = Math.max(1, Number(defaultPointsEditor.value)||100);
+        const newQuestionCount = Math.min(40, Math.max(1, Number(questionCountEditor.value)||15));
+        const newTeamCount = Math.min(8, Math.max(1, Number(teamCountEditor.value)||4));
+        let teamChanged = false;
+        if(newTeamCount !== teamCount){
+          const old = scores.slice();
+          teamCount = newTeamCount;
+          scores = new Array(teamCount).fill(0);
+          for(let i=0;i<Math.min(old.length, scores.length); i++){ scores[i] = old[i]; }
+          if(currentTeam >= teamCount) currentTeam = 0;
+          teamChanged = true;
+        }
+        questionCount = newQuestionCount;
+        // save QA
+        Array.from(qaList.children).forEach(row=>{
+          const id = row.dataset.id;
+          const q = row.querySelector('.q').value.trim();
+          const a = row.querySelector('.a').value.trim();
+          qa[id].q = q || qa[id].q;
+          qa[id].a = a || qa[id].a;
+        });
+        persistState();
+        // re-render
+        renderTeams();
+        renderBoard();
+        buildWheel();
+        if(teamChanged) populateEditor();
+        editor.style.display='none';
+      };
+    }
+
+    /* Audio */
+    function playCorrect(){}
+    function playWrong(){}
+
+    /* Init */
+    loadState();
+    buildWheel();
+    renderBoard();
+    renderTeams();
+  </script>
+</body>
+</html>
