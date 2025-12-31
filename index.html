@@ -225,17 +225,34 @@
         'https://libretranslate.com/translate',
         'https://translate.argosopentech.com/translate'
       ];
+      // Try direct endpoints first, then proxied (CORS fallback)
       for(const endpoint of endpoints){
+        // Direct
         try{
           const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ q: t, source, target, format: 'text' })
           });
-          if(!res.ok) continue;
-          const data = await res.json();
-          const out = (data && data.translatedText) || '';
-          if(out) return out;
+          if(res.ok){
+            const data = await res.json();
+            const out = (data && data.translatedText) || '';
+            if(out){ try{ if(!override) localStorage.setItem('twTranslateEndpoint', endpoint); }catch(e){}; return out; }
+          }
+        }catch(e){ /* try proxy below */ }
+        // Proxy via isomorphic-git CORS helper (supports POST)
+        try{
+          const proxied = 'https://cors.isomorphic-git.org/' + endpoint;
+          const res = await fetch(proxied, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ q: t, source, target, format: 'text' })
+          });
+          if(res.ok){
+            const data = await res.json();
+            const out = (data && data.translatedText) || '';
+            if(out){ try{ if(!override) localStorage.setItem('twTranslateEndpoint', proxied); }catch(e){}; return out; }
+          }
         }catch(e){ /* try next endpoint */ }
       }
       return '';
