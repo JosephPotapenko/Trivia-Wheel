@@ -219,8 +219,7 @@
       const t = (text || '').trim();
       if(!t) return '';
       const source = target === 'ru' ? 'en' : 'ru';
-      const override = new URLSearchParams(location.search).get('translateEndpoint') || (function(){ try { return localStorage.getItem('twTranslateEndpoint') || ''; } catch(e){ return ''; } })();
-      const endpoints = override ? [override] : [
+      const endpoints = [
         'https://libretranslate.de/translate',
         'https://libretranslate.com/translate',
         'https://translate.argosopentech.com/translate'
@@ -237,7 +236,7 @@
           if(res.ok){
             const data = await res.json();
             const out = (data && data.translatedText) || '';
-            if(out){ try{ if(!override) localStorage.setItem('twTranslateEndpoint', endpoint); }catch(e){}; return out; }
+            if(out){ return out; }
           }
         }catch(e){ /* try proxy below */ }
         // Proxy via isomorphic-git CORS helper (supports POST)
@@ -251,7 +250,7 @@
           if(res.ok){
             const data = await res.json();
             const out = (data && data.translatedText) || '';
-            if(out){ try{ if(!override) localStorage.setItem('twTranslateEndpoint', proxied); }catch(e){}; return out; }
+            if(out){ return out; }
           }
         }catch(e){ /* try next endpoint */ }
       }
@@ -680,10 +679,6 @@
           <span>Russian Mode (RU-only)</span>
         </label>
       </div>
-      <div class="row" style="align-items:center;gap:8px">
-        <label for="translateEndpointEditor" style="font-size:12px;color:var(--sub)">Translator endpoint (optional)</label>
-        <input id="translateEndpointEditor" type="text" placeholder="https://libretranslate.de/translate" style="flex:1"/>
-      </div>
       <div class="row" style="justify-content:flex-start">
         <button class="btn secondary" id="importTxtBtn">Import submissions</button>
         <button class="btn ghost" id="clearImportBtn">Clear import</button>
@@ -713,7 +708,6 @@
     const importTxtBtn = editor.querySelector('#importTxtBtn');
     const clearImportBtn = editor.querySelector('#clearImportBtn');
     const ruModeToggle = editor.querySelector('#ruModeToggle');
-    const translateEndpointEditor = editor.querySelector('#translateEndpointEditor');
     if(importTxtBtn){ importTxtBtn.onclick = importQAFromLocal; }
     if(clearImportBtn){ clearImportBtn.onclick = clearImportedSubmissions; }
     if(ruModeToggle){
@@ -726,17 +720,7 @@
         renderBoard();
       });
     }
-    if(translateEndpointEditor){
-      const paramOverride = new URLSearchParams(location.search).get('translateEndpoint');
-      try{
-        const saved = localStorage.getItem('twTranslateEndpoint') || '';
-        translateEndpointEditor.value = paramOverride || saved;
-      }catch(e){ translateEndpointEditor.value = paramOverride || ''; }
-      translateEndpointEditor.addEventListener('change', ()=>{
-        const val = translateEndpointEditor.value.trim();
-        try{ localStorage.setItem('twTranslateEndpoint', val); }catch(e){}
-      });
-    }
+    
 
     function populateEditor(){
       qaList.innerHTML='';
@@ -803,7 +787,7 @@
         buildWheel();
         renderTeams();
         if(attempts > 0 && successes === 0){
-          alert('Imported, but translation service was unreachable. You can set a custom endpoint via ?translateEndpoint=URL (LibreTranslate-compatible).');
+          alert('Imported, but the translation service was unreachable. Showing original text.');
         }
         // Auto-close editor to preserve anonymity; avoid rendering QA in the editor
         try{
