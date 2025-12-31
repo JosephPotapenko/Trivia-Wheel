@@ -2,27 +2,19 @@
 
 Minimal modern trivia game with a wheel-based UI.
 
-## Repository Save + Import
+## Client-Only Save + Import
 
-This repo now saves story submissions to a text file and imports them directly into the game.
+No server required. Submissions are stored in the browser’s localStorage and imported directly into the game.
 
-- Save destination: [assets/stories.txt](assets/stories.txt)
-- Format: one line per entry using `Question||Answer`. The story page writes only the question part (`Q||...`); the game fills default answers.
+- Storage key: `twSubmissionsText`
+- Format: one line per entry using `Question||Answer`. The story page writes `Q||...` (question only); answers are filled with defaults if missing.
 
-### Run the local server
+### Use It
 
-Use the built-in Python HTTP server with a POST endpoint to append submissions to `assets/stories.txt`.
-
-```
-python3 server.py
-```
-
-Then visit:
-
-- Story submission: http://localhost:8000/story.html
-- Game: http://localhost:8000/index.html
-
-In the game editor, click `Import submissions` to load questions from `assets/stories.txt`.
+1. Open [story.html](story.html) in a browser.
+2. Submit a story and name. The page sanitizes and appends the line to localStorage.
+3. Open [index.html](index.html), click `Edit`, then `Import submissions`.
+4. After the game, click `Clear import` in the editor to delete stored submissions.
 
 ## Story Submission Page
 
@@ -33,7 +25,7 @@ In the game editor, click `Import submissions` to load questions from `assets/st
 
 ### Try it locally
 
-Open [story.html](story.html) via the local server at http://localhost:8000/story.html. Submissions are saved into [assets/stories.txt](assets/stories.txt).
+Open [story.html](story.html) directly. Submissions persist per browser via localStorage.
 
 ## Features
 

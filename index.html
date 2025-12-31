@@ -629,7 +629,8 @@
       </div>
       <div class="row" style="justify-content:flex-start">
         <button class="btn secondary" id="importTxtBtn">Import submissions</button>
-        <span style="font-size:12px;color:var(--sub)">Reads assets/stories.txt (one line per question||answer)</span>
+        <button class="btn ghost" id="clearImportBtn">Clear import</button>
+        <span style="font-size:12px;color:var(--sub)">Reads from localStorage (one line per question||answer)</span>
       </div>
       <div class="qa" id="qaList"></div>
       <div class="row" style="justify-content:flex-end">
@@ -652,7 +653,9 @@
     const saveAll = editor.querySelector('#saveAll');
     const closeEditor = editor.querySelector('#closeEditor');
     const importTxtBtn = editor.querySelector('#importTxtBtn');
-    if(importTxtBtn){ importTxtBtn.onclick = importQAFromRepo; }
+    const clearImportBtn = editor.querySelector('#clearImportBtn');
+    if(importTxtBtn){ importTxtBtn.onclick = importQAFromLocal; }
+    if(clearImportBtn){ clearImportBtn.onclick = clearImportedSubmissions; }
 
     function populateEditor(){
       qaList.innerHTML='';
@@ -664,11 +667,10 @@
       }
     }
 
-    async function importQAFromRepo(){
+    async function importQAFromLocal(){
       try{
-        const res = await fetch('assets/stories.txt', { cache: 'no-store' });
-        if(!res.ok){ alert('No submissions file found at assets/stories.txt'); return; }
-        const text = await res.text();
+        const text = localStorage.getItem('twSubmissionsText') || '';
+        if(!text){ alert('No submissions found in localStorage.'); return; }
         const items = parseQAFromText(text);
         questionCount = Math.min(40, Math.max(1, items.length));
         for(let i=1;i<=40;i++){
@@ -688,10 +690,18 @@
         buildWheel();
         renderTeams();
         try{ if(editor && editor.style.display==='block') populateEditor(); }catch(e){}
-        alert('Questions imported from repository: ' + items.length);
+        alert('Questions imported from submissions: ' + items.length);
       }catch(e){
         alert('Failed to import: ' + (e && e.message ? e.message : 'unknown error'));
       }
+    }
+
+    function clearImportedSubmissions(){
+      try{
+        localStorage.removeItem('twSubmissionsText');
+        localStorage.removeItem('twImportedRaw');
+        alert('Cleared imported submissions from localStorage.');
+      }catch(e){ alert('Failed to clear imports.'); }
     }
     function toggleEditor(){
       if(editor.style.display==='none' || editor.style.display===''){
