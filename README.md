@@ -12,16 +12,15 @@ No server required. Submissions are stored in the browser’s localStorage and i
 ### Use It
 
 1. Open [story.html](story.html) in a browser.
-2. Submit a story and name. The page sanitizes and appends the line to localStorage.
-3. Open [index.html](index.html), click `Edit`, then `Import submissions`.
+2. Submit a story and name. The page appends `story||name` to localStorage.
+3. Open [index.html](index.html), click `Edit`, then `Import submissions`. The spinning wheel count equals the number of submissions (capped at 40).
 4. After the game, click `Clear import` in the editor to delete stored submissions.
 
 ## Story Submission Page
 
 - New page: [story.html](story.html)
 - Share this link for users to submit one story and name.
-- The page runs a lightweight, client-side AI-style sanitizer to remove identifying details, polish grammar, and add gentle dad humor without changing the core story content.
-- Optional remote model: append `?modelEndpoint=https://your-endpoint` to the URL to proxy through a server-side sanitizer.
+- The page stores entries exactly as entered (no AI changes).
 
 ### Try it locally
 

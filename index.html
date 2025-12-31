@@ -672,7 +672,9 @@
         const text = localStorage.getItem('twSubmissionsText') || '';
         if(!text){ alert('No submissions found in localStorage.'); return; }
         const items = parseQAFromText(text);
-        questionCount = Math.min(40, Math.max(1, items.length));
+        if(items.length === 0){ alert('No valid submissions found.'); return; }
+        const capped = Math.min(40, items.length);
+        questionCount = capped;
         for(let i=1;i<=40;i++){
           const it = items[i-1];
           if(it){
@@ -689,8 +691,14 @@
         renderBoard();
         buildWheel();
         renderTeams();
-        try{ if(editor && editor.style.display==='block') populateEditor(); }catch(e){}
-        alert('Questions imported from submissions: ' + items.length);
+        try{ 
+          if(editor && editor.style.display==='block'){
+            const questionCountEditor = editor.querySelector('#questionCountEditor');
+            if(questionCountEditor) questionCountEditor.value = String(questionCount);
+            populateEditor();
+          }
+        }catch(e){}
+        alert('Imported ' + items.length + ' submissions; wheel set to ' + capped + (items.length>40 ? ' (capped at 40).' : '.'));
       }catch(e){
         alert('Failed to import: ' + (e && e.message ? e.message : 'unknown error'));
       }

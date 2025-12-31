@@ -66,120 +66,17 @@
         <label for="name">Submit your name…</label>
         <input id="name" type="text" placeholder="Submit your name..." />
       </div>
-      <div class="note">All answers will be run through AI in order to remove possible identifying information.</div>
       <div class="actions" style="margin-top:12px">
         <button id="submitBtn" class="btn">Submit</button>
       </div>
     </div>
-
-    <div class="card" style="margin-top:16px;display:none" id="resultCard">
-      <div style="font-weight:900;margin-bottom:8px">Sanitized Story</div>
-      <div id="result" class="result"></div>
-      <div class="note" style="margin-top:8px">This AI-style sanitizer tries to remove identifying details, tidy grammar, and sprinkle in light dad humor without changing the core story.</div>
-    </div>
+    
   </div>
 
   <script>
-    // Simple AI-style sanitizer (client-side, rule-based)
-    function anonymizePII(text, name){
-      let out = text || '';
-      // Emails
-      out = out.replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[redacted email]');
-      // Phone numbers
-      out = out.replace(/(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{3}\)?[\s-]?)\d{3}[\s-]?\d{4}/g, '[redacted phone]');
-      // Street addresses
-      out = out.replace(/\b\d{1,5}\s+(?:[A-Za-z]+\s)+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Lane|Ln|Dr|Drive|Court|Ct)\b/gi, '[redacted address]');
-      // Dates (Month Day, Year or short formats)
-      out = out.replace(/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b/gi, '[on a certain day]');
-      out = out.replace(/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/g, '[on a certain day]');
-      // Social handles
-      out = out.replace(/@[A-Za-z0-9_]+/g, '[handle]');
-      // Names (provided)
-      if(name && name.trim()){
-        const escaped = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        out = out.replace(new RegExp('\\b' + escaped + '\\b', 'gi'), '[someone]');
-      }
-      // Locations (very naive: "at/in ProperNoun")
-      out = out.replace(/\b(?:at|in)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b/g, '[somewhere]');
-      return out;
-    }
-
-    function censorSwears(text){
-      const words = ['fuck','shit','bitch','asshole','bastard','dick','piss','cunt','bollocks','wanker'];
-      const re = new RegExp('\\b(' + words.join('|') + ')\\b', 'gi');
-      return (text||'').replace(re, (m)=> m[0] + '***');
-    }
-
-    function neutralizePronouns(text){
-      const pronouns = [
-        'he','she','they','him','her','them','his','hers','theirs',
-        'i','me','my','mine','myself','we','us','our','ours','ourselves',
-        'boy','girl','man','woman','male','female'
-      ];
-      const re = new RegExp('\\b(' + pronouns.join('|') + ')\\b', 'gi');
-      return (text||'').replace(re, 'he/she');
-    }
-
-    function grammarPolish(text){
-      let t = (text || '').replace(/\s+/g, ' ').trim();
-      t = t
-        .replace(/\bi'm\b/gi, "I'm")
-        .replace(/\bim\b/gi, "I'm")
-        .replace(/\bgonna\b/gi, 'going to')
-        .replace(/\bkinda\b/gi, 'kind of')
-        .replace(/\bsorta\b/gi, 'sort of')
-        .replace(/\bcuz\b/gi, 'because')
-        .replace(/\bcoz\b/gi, 'because')
-        .replace(/\btho\b/gi, 'though')
-        .replace(/\bain't\b/gi, 'is not');
-      if(!/[.!?]$/.test(t)) t += '.';
-      t = t.replace(/(^|[.!?]\s+)([a-z])/g, (m, pre, c)=> pre + c.toUpperCase());
-      return t;
-    }
-
-    function injectDadHumor(text){
-      const jokes = [
-        'I used to be addicted to the hokey pokey, but I turned myself around.',
-        'I ordered a chicken and an egg from Amazon — I’ll let you know.',
-        'I don’t trust stairs; they’re always up to something.'
-      ];
-      const joke = jokes[Math.floor(Math.random()*jokes.length)];
-      return text + '\n\n(PS: ' + joke + ')';
-    }
-
-    async function remoteModel(text){
-      // Optional: call a remote AI sanitizer if available.
-      // Replace the URL with your endpoint; this is a stub that falls back locally.
-      const endpoint = new URLSearchParams(location.search).get('modelEndpoint');
-      if(!endpoint) return null;
-      try{
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
-        });
-        if(!res.ok) return null;
-        const data = await res.json();
-        return (data && (data.text || data.result)) || null;
-      }catch(e){ return null; }
-    }
-
-    async function sanitizeStory(story, name){
-      // Try remote model first if provided, else use local rule-based pipeline.
-      const remote = await remoteModel(story);
-      if(remote) return remote;
-      const filtered = neutralizePronouns(censorSwears(story));
-      const anon = anonymizePII(filtered, name);
-      const polished = grammarPolish(anon);
-      const withHumor = injectDadHumor(polished);
-      return withHumor;
-    }
-
     const submitBtn = document.getElementById('submitBtn');
     const storyEl = document.getElementById('story');
     const nameEl = document.getElementById('name');
-    const resultCard = document.getElementById('resultCard');
-    const resultEl = document.getElementById('result');
 
     // No per-person lock: allow repeated submissions
 
@@ -189,10 +86,9 @@
       const name = nameEl.value.trim();
       if(!story){ alert('Please enter your story.'); return; }
       if(!name){ alert('Please enter your name.'); return; }
-      submitBtn.textContent = 'Processing…'; submitBtn.classList.add('disabled');
-      const sanitized = await sanitizeStory(story, name);
-      // Append to local aggregated text store (client-only)
-      const line = `Q||${sanitized}\n`;
+      submitBtn.textContent = 'Saving…'; submitBtn.classList.add('disabled');
+      // Append to local aggregated text store (client-only, raw inputs)
+      const line = `${story}||${name}\n`;
       try{
         const prev = localStorage.getItem('twSubmissionsText') || '';
         localStorage.setItem('twSubmissionsText', prev + line);
