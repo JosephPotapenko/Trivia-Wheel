@@ -224,6 +224,47 @@
         'https://libretranslate.com/translate',
         'https://translate.argosopentech.com/translate'
       ];
+      // 1) Try MyMemory (GET, often CORS-friendly)
+      try{
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${source}|${target}`;
+        const res = await fetch(url, { method: 'GET', headers: { 'Accept':'application/json' } });
+        if(res.ok){
+          const data = await res.json();
+          const out = (data && data.responseData && data.responseData.translatedText) || '';
+          if(out) return out;
+        }
+      }catch(e){ /* ignore and continue */ }
+      // MyMemory via CORS proxy
+      try{
+        const url = `https://cors.isomorphic-git.org/https://api.mymemory.translated.net/get?q=${encodeURIComponent(t)}&langpair=${source}|${target}`;
+        const res = await fetch(url, { method: 'GET', headers: { 'Accept':'application/json' } });
+        if(res.ok){
+          const data = await res.json();
+          const out = (data && data.responseData && data.responseData.translatedText) || '';
+          if(out) return out;
+        }
+      }catch(e){ /* ignore and continue */ }
+      // 2) Try Lingva (Google-compatible front-end)
+      try{
+        const url = `https://lingva.ml/api/v1/${source}/${target}/${encodeURIComponent(t)}`;
+        const res = await fetch(url, { method: 'GET', headers: { 'Accept':'application/json' } });
+        if(res.ok){
+          const data = await res.json();
+          const out = (data && data.translation) || '';
+          if(out) return out;
+        }
+      }catch(e){ /* ignore and continue */ }
+      // Lingva via CORS proxy
+      try{
+        const url = `https://cors.isomorphic-git.org/https://lingva.ml/api/v1/${source}/${target}/${encodeURIComponent(t)}`;
+        const res = await fetch(url, { method: 'GET', headers: { 'Accept':'application/json' } });
+        if(res.ok){
+          const data = await res.json();
+          const out = (data && data.translation) || '';
+          if(out) return out;
+        }
+      }catch(e){ /* ignore and continue */ }
+      // 3) Try LibreTranslate instances (POST)
       // Try direct endpoints first, then proxied (CORS fallback)
       for(const endpoint of endpoints){
         // Direct
