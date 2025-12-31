@@ -635,7 +635,6 @@
       <div class="qa" id="qaList"></div>
       <div class="row" style="justify-content:flex-end">
         <button class="btn" id="saveQA" style="color:#0b1b2b">Save</button>
-        <button class="btn" id="saveAll" style="color:#0b1b2b">Save All</button>
         <button class="btn ghost" id="clearQuestionsBtn" style="color:#0b1b2b">Clear Questions</button>
         <button class="btn secondary" id="closeEditor">Close</button>
       </div>
@@ -651,7 +650,6 @@
     const teamCountEditor = editor.querySelector('#teamCountEditor');
     const applyConfig = editor.querySelector('#applyConfig');
     const saveQA = editor.querySelector('#saveQA');
-    const saveAll = editor.querySelector('#saveAll');
     const clearQuestionsBtn = editor.querySelector('#clearQuestionsBtn');
     const closeEditor = editor.querySelector('#closeEditor');
     const importTxtBtn = editor.querySelector('#importTxtBtn');
@@ -693,14 +691,17 @@
         renderBoard();
         buildWheel();
         renderTeams();
-        try{ 
+        // Auto-close editor to preserve anonymity; avoid rendering QA in the editor
+        try{
           if(editor && editor.style.display==='block'){
             const questionCountEditor = editor.querySelector('#questionCountEditor');
             if(questionCountEditor) questionCountEditor.value = String(questionCount);
-            populateEditor();
+            const qaList = editor.querySelector('#qaList');
+            if(qaList) qaList.innerHTML = '';
+            editor.style.display = 'none';
           }
         }catch(e){}
-        alert('Imported ' + items.length + ' submissions; wheel set to ' + capped + (items.length>40 ? ' (capped at 40).' : '.'));
+        alert('Imported ' + items.length + ' submissions; wheel set to ' + capped + (items.length>40 ? ' (capped at 40).' : '.') + '\nEditor closed to preserve anonymity.');
       }catch(e){
         alert('Failed to import: ' + (e && e.message ? e.message : 'unknown error'));
       }
@@ -800,6 +801,21 @@
       }catch(e){}
     }
     saveQA.onclick = ()=>{
+      // apply config
+      defaultPoints = Math.max(1, Number(defaultPointsEditor.value)||100);
+      const newQuestionCount = Math.min(40, Math.max(1, Number(questionCountEditor.value)||15));
+      const newTeamCount = Math.min(8, Math.max(1, Number(teamCountEditor.value)||4));
+      let teamChanged = false;
+      if(newTeamCount !== teamCount){
+        const old = scores.slice();
+        teamCount = newTeamCount;
+        scores = new Array(teamCount).fill(0);
+        for(let i=0;i<Math.min(old.length, scores.length); i++){ scores[i] = old[i]; }
+        if(currentTeam >= teamCount) currentTeam = 0;
+        teamChanged = true;
+      }
+      questionCount = newQuestionCount;
+      // save QA
       Array.from(qaList.children).forEach(row=>{
         const id = row.dataset.id;
         const q = row.querySelector('.q').value.trim();
@@ -808,41 +824,13 @@
         qa[id].a = a || qa[id].a;
       });
       persistState();
+      // re-render
+      renderTeams();
+      renderBoard();
+      buildWheel();
+      if(teamChanged) populateEditor();
       editor.style.display='none';
     };
-    if(saveAll){
-      saveAll.onclick = ()=>{
-        // apply config
-        defaultPoints = Math.max(1, Number(defaultPointsEditor.value)||100);
-        const newQuestionCount = Math.min(40, Math.max(1, Number(questionCountEditor.value)||15));
-        const newTeamCount = Math.min(8, Math.max(1, Number(teamCountEditor.value)||4));
-        let teamChanged = false;
-        if(newTeamCount !== teamCount){
-          const old = scores.slice();
-          teamCount = newTeamCount;
-          scores = new Array(teamCount).fill(0);
-          for(let i=0;i<Math.min(old.length, scores.length); i++){ scores[i] = old[i]; }
-          if(currentTeam >= teamCount) currentTeam = 0;
-          teamChanged = true;
-        }
-        questionCount = newQuestionCount;
-        // save QA
-        Array.from(qaList.children).forEach(row=>{
-          const id = row.dataset.id;
-          const q = row.querySelector('.q').value.trim();
-          const a = row.querySelector('.a').value.trim();
-          qa[id].q = q || qa[id].q;
-          qa[id].a = a || qa[id].a;
-        });
-        persistState();
-        // re-render
-        renderTeams();
-        renderBoard();
-        buildWheel();
-        if(teamChanged) populateEditor();
-        editor.style.display='none';
-      };
-    }
 
     if(clearQuestionsBtn){
       clearQuestionsBtn.onclick = ()=>{

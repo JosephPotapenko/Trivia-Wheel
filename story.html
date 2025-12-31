@@ -60,11 +60,11 @@
     <div class="card">
       <div class="row">
         <label for="story">Tell a funny story about your life… (the funnier the better)</label>
-        <textarea id="story" placeholder="Tell a funny story about your life..."></textarea>
+        <textarea id="story" placeholder="Tell a funny story about your life..." autocomplete="off"></textarea>
       </div>
       <div class="row">
         <label for="name">Submit your name…</label>
-        <input id="name" type="text" placeholder="Submit your name..." />
+        <input id="name" type="text" placeholder="Submit your name..." autocomplete="off" />
       </div>
       <div class="actions" style="margin-top:12px">
         <button id="submitBtn" class="btn">Submit</button>
@@ -93,9 +93,19 @@
         const prev = localStorage.getItem('twSubmissionsText') || '';
         localStorage.setItem('twSubmissionsText', prev + line);
       }catch(e){}
+      // Clear inputs immediately after successful submission
+      storyEl.value = '';
+      nameEl.value = '';
+      submitBtn.textContent = 'Submit';
+      submitBtn.classList.remove('disabled');
       alert('Your story has been submitted.');
-      location.reload();
     });
+
+    // Clear inputs when leaving/closing the page and when returning via bfcache
+    function clearInputs(){ try{ storyEl.value=''; nameEl.value=''; }catch(e){} }
+    window.addEventListener('pagehide', clearInputs);
+    document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') clearInputs(); });
+    window.addEventListener('pageshow', clearInputs);
   </script>
 </body>
 </html>

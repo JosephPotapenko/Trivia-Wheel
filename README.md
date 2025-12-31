@@ -13,7 +13,7 @@ No server required. Submissions are stored in the browser’s localStorage and i
 
 1. Open [story.html](story.html) in a browser.
 2. Submit a story and name. The page appends `story||name` to localStorage.
-3. Open [index.html](index.html), click `Edit`, then `Import submissions`. The spinning wheel count equals the number of submissions (capped at 40).
+3. Open [index.html](index.html), click `Edit`, then `Import submissions`. The spinning wheel count equals the number of submissions (capped at 40). The editor will automatically close after import to preserve anonymity.
 4. After the game, click `Clear import` in the editor to delete stored submissions.
 5. Use `Clear Questions` in the editor to reset all questions/answers back to defaults.
 
