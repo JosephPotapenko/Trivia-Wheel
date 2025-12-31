@@ -219,7 +219,7 @@
       const t = (text || '').trim();
       if(!t) return '';
       const source = target === 'ru' ? 'en' : 'ru';
-      const override = new URLSearchParams(location.search).get('translateEndpoint');
+      const override = new URLSearchParams(location.search).get('translateEndpoint') || (function(){ try { return localStorage.getItem('twTranslateEndpoint') || ''; } catch(e){ return ''; } })();
       const endpoints = override ? [override] : [
         'https://libretranslate.de/translate',
         'https://libretranslate.com/translate',
@@ -663,6 +663,10 @@
           <span>Russian Mode (RU-only)</span>
         </label>
       </div>
+      <div class="row" style="align-items:center;gap:8px">
+        <label for="translateEndpointEditor" style="font-size:12px;color:var(--sub)">Translator endpoint (optional)</label>
+        <input id="translateEndpointEditor" type="text" placeholder="https://libretranslate.de/translate" style="flex:1"/>
+      </div>
       <div class="row" style="justify-content:flex-start">
         <button class="btn secondary" id="importTxtBtn">Import submissions</button>
         <button class="btn ghost" id="clearImportBtn">Clear import</button>
@@ -692,6 +696,7 @@
     const importTxtBtn = editor.querySelector('#importTxtBtn');
     const clearImportBtn = editor.querySelector('#clearImportBtn');
     const ruModeToggle = editor.querySelector('#ruModeToggle');
+    const translateEndpointEditor = editor.querySelector('#translateEndpointEditor');
     if(importTxtBtn){ importTxtBtn.onclick = importQAFromLocal; }
     if(clearImportBtn){ clearImportBtn.onclick = clearImportedSubmissions; }
     if(ruModeToggle){
@@ -702,6 +707,17 @@
         updateLanguageUI();
         buildWheel();
         renderBoard();
+      });
+    }
+    if(translateEndpointEditor){
+      const paramOverride = new URLSearchParams(location.search).get('translateEndpoint');
+      try{
+        const saved = localStorage.getItem('twTranslateEndpoint') || '';
+        translateEndpointEditor.value = paramOverride || saved;
+      }catch(e){ translateEndpointEditor.value = paramOverride || ''; }
+      translateEndpointEditor.addEventListener('change', ()=>{
+        const val = translateEndpointEditor.value.trim();
+        try{ localStorage.setItem('twTranslateEndpoint', val); }catch(e){}
       });
     }
 
