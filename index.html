@@ -218,18 +218,27 @@
     async function translateGeneric(text, target){
       const t = (text || '').trim();
       if(!t) return '';
-      const endpoint = new URLSearchParams(location.search).get('translateEndpoint') || 'https://libretranslate.com/translate';
       const source = target === 'ru' ? 'en' : 'ru';
-      try{
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ q: t, source, target, format: 'text' })
-        });
-        if(!res.ok) return '';
-        const data = await res.json();
-        return (data && data.translatedText) || '';
-      }catch(e){ return ''; }
+      const override = new URLSearchParams(location.search).get('translateEndpoint');
+      const endpoints = override ? [override] : [
+        'https://libretranslate.de/translate',
+        'https://libretranslate.com/translate',
+        'https://translate.argosopentech.com/translate'
+      ];
+      for(const endpoint of endpoints){
+        try{
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ q: t, source, target, format: 'text' })
+          });
+          if(!res.ok) continue;
+          const data = await res.json();
+          const out = (data && data.translatedText) || '';
+          if(out) return out;
+        }catch(e){ /* try next endpoint */ }
+      }
+      return '';
     }
     
     async function importQAFromFile(){
@@ -714,19 +723,38 @@
         if(items.length === 0){ alert('No valid submissions found.'); return; }
         const capped = Math.min(40, items.length);
         questionCount = capped;
+        let attempts = 0, successes = 0;
         for(let i=1;i<=40;i++){
           const it = items[i-1];
           if(it){
             let q = it.q || ('Question ' + i);
             let a = (typeof it.a === 'string' ? it.a : '') || ('Answer ' + i);
             if(ruMode){
-              const qFinal = isRussian(q) ? q : (await translateGeneric(q,'ru') || q);
-              const aFinal = isRussian(a) ? a : (await translateGeneric(a,'ru') || a);
+              let qFinal = q, aFinal = a;
+              if(!isRussian(q)){
+                attempts++;
+                const t = await translateGeneric(q,'ru');
+                if(t){ qFinal = t; successes++; } else { qFinal = q; }
+              }
+              if(!isRussian(a)){
+                attempts++;
+                const t = await translateGeneric(a,'ru');
+                if(t){ aFinal = t; successes++; } else { aFinal = a; }
+              }
               qa['t'+i].q = qFinal;
               qa['t'+i].a = aFinal;
             } else {
-              const qFinal = isRussian(q) ? (await translateGeneric(q,'en') || q) : q;
-              const aFinal = isRussian(a) ? (await translateGeneric(a,'en') || a) : a;
+              let qFinal = q, aFinal = a;
+              if(isRussian(q)){
+                attempts++;
+                const t = await translateGeneric(q,'en');
+                if(t){ qFinal = t; successes++; } else { qFinal = q; }
+              }
+              if(isRussian(a)){
+                attempts++;
+                const t = await translateGeneric(a,'en');
+                if(t){ aFinal = t; successes++; } else { aFinal = a; }
+              }
               qa['t'+i].q = qFinal;
               qa['t'+i].a = aFinal;
             }
@@ -741,6 +769,9 @@
         renderBoard();
         buildWheel();
         renderTeams();
+        if(attempts > 0 && successes === 0){
+          alert('Imported, but translation service was unreachable. You can set a custom endpoint via ?translateEndpoint=URL (LibreTranslate-compatible).');
+        }
         // Auto-close editor to preserve anonymity; avoid rendering QA in the editor
         try{
           if(editor && editor.style.display==='block'){
