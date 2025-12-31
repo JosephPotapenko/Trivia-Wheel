@@ -52,29 +52,50 @@
   <div class="wrap">
     <header>
       <div>
-        <div class="title">Share A Story</div>
-        <div class="sub">Tell one story at a time — thanks!</div>
+          <div class="title" id="titleText">Share A Story</div>
+          <div class="sub" id="subText">One story at a time. Once you've submitted- there's no going back, so please be careful!</div>
       </div>
     </header>
 
     <div class="card">
       <div class="row">
-        <label for="story">Tell a funny story about your life… (the funnier the better)</label>
-        <textarea id="story" placeholder="Tell a funny story about your life..." autocomplete="off"></textarea>
+        <label for="story" id="storyLabel">Tell a funny story about your life… (the funnier the better)</label>
+        <textarea id="story" placeholder="Tell a funny story about your life." autocomplete="off"></textarea>
       </div>
       <div class="row">
-        <label for="name">Submit your name…</label>
-        <input id="name" type="text" placeholder="Submit your name..." autocomplete="off" />
+          <label for="name" id="nameLabel">Submit your name…</label>
+          <input id="name" type="text" placeholder="Submit your name..." autocomplete="off" />
       </div>
       <div class="actions" style="margin-top:12px">
-        <button id="submitBtn" class="btn">Submit</button>
+          <button id="submitBtn" class="btn">Submit</button>
       </div>
     </div>
     
   </div>
 
   <script>
+    // Language mode shared with game page
+    let ruMode = true;
+    function lang(en, ru){ return ruMode ? ru : en; }
+    try{
+      const raw = localStorage.getItem('twRuMode');
+      if(raw){ const obj = JSON.parse(raw); if(typeof obj.ruMode === 'boolean') ruMode = obj.ruMode; }
+    }catch(e){}
+    const titleText = document.getElementById('titleText');
+    const subText = document.getElementById('subText');
+    const storyLabel = document.getElementById('storyLabel');
+    const nameLabel = document.getElementById('nameLabel');
     const submitBtn = document.getElementById('submitBtn');
+    function updateLanguageUI(){
+      // Instructions and labels shown in both languages
+      titleText.textContent = 'Share A Story / Поделитесь историей';
+      subText.textContent = "One story at a time. Once you've submitted- there's no going back, so please be careful! / Пожалуйста, отправляйте одну историю за раз. После отправки вернуться нельзя, будьте осторожны!";
+      storyLabel.textContent = 'Tell a funny story about your life… (the funnier the better) / Расскажите забавную историю из вашей жизни (чем смешнее, тем лучше)';
+      nameLabel.textContent = 'Submit your name… / Укажите своё имя';
+      // Buttons remain single-language via ruMode
+      submitBtn.textContent = lang('Submit','Отправить');
+    }
+    updateLanguageUI();
     const storyEl = document.getElementById('story');
     const nameEl = document.getElementById('name');
 

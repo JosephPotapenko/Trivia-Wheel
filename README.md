@@ -17,6 +17,11 @@ No server required. Submissions are stored in the browser’s localStorage and i
 4. After the game, click `Clear import` in the editor to delete stored submissions.
 5. Use `Clear Questions` in the editor to reset all questions/answers back to defaults.
 
+### Import and Clear Etiquette
+
+- Import submissions reads entries from the current browser’s localStorage and immediately closes the editor so no one sees the text.
+- To be respectful of future users, please open the editor and click `Clear import` when the game is over. This removes stored submissions so next sessions begin clean.
+
 ## Story Submission Page
 
 - New page: [story.html](story.html)
