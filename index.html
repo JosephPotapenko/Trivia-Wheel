@@ -491,7 +491,7 @@
     }
 
     function updateTurnLabel(){
-      turnLabel.textContent = `${lang('Team','Команда')} ${currentTeam+1} — $${defaultPoints}`;
+      turnLabel.textContent = ruMode ? `Team / Команда ${currentTeam+1} — $${defaultPoints}` : `Team ${currentTeam+1} — $${defaultPoints}`;
     }
 
     /* Card flow */

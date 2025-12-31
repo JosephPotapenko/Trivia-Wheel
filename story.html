@@ -92,8 +92,8 @@
       subText.textContent = "One story at a time. Once you've submitted- there's no going back, so please be careful! / Пожалуйста, отправляйте одну историю за раз. После отправки вернуться нельзя, будьте осторожны!";
       storyLabel.textContent = 'Tell a funny story about your life… (the funnier the better) / Расскажите забавную историю из вашей жизни (чем смешнее, тем лучше)';
       nameLabel.textContent = 'Submit your name… / Укажите своё имя';
-      // Buttons remain single-language via ruMode
-      submitBtn.textContent = lang('Submit','Отправить');
+      // Buttons: always English-only
+      submitBtn.textContent = 'Submit';
     }
     updateLanguageUI();
     const storyEl = document.getElementById('story');
