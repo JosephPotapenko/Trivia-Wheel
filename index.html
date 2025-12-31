@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Winter One-derland</title>
+  <title>Spin The Wheel Trivia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Baloo+2:wght@700;800&family=Chewy&display=swap" rel="stylesheet">
@@ -634,8 +634,9 @@
       </div>
       <div class="qa" id="qaList"></div>
       <div class="row" style="justify-content:flex-end">
-        <button class="btn" id="saveQA">Save</button>
-        <button class="btn" id="saveAll" style="color:#89CFF0">Save All</button>
+        <button class="btn" id="saveQA" style="color:#0b1b2b">Save</button>
+        <button class="btn" id="saveAll" style="color:#0b1b2b">Save All</button>
+        <button class="btn ghost" id="clearQuestionsBtn" style="color:#0b1b2b">Clear Questions</button>
         <button class="btn secondary" id="closeEditor">Close</button>
       </div>
     `;
@@ -651,6 +652,7 @@
     const applyConfig = editor.querySelector('#applyConfig');
     const saveQA = editor.querySelector('#saveQA');
     const saveAll = editor.querySelector('#saveAll');
+    const clearQuestionsBtn = editor.querySelector('#clearQuestionsBtn');
     const closeEditor = editor.querySelector('#closeEditor');
     const importTxtBtn = editor.querySelector('#importTxtBtn');
     const clearImportBtn = editor.querySelector('#clearImportBtn');
@@ -839,6 +841,23 @@
         buildWheel();
         if(teamChanged) populateEditor();
         editor.style.display='none';
+      };
+    }
+
+    if(clearQuestionsBtn){
+      clearQuestionsBtn.onclick = ()=>{
+        if(!confirm('Clear all questions and answers? This resets to defaults.')) return;
+        for(let i=1;i<=40;i++){
+          qa['t'+i].q = 'Question ' + i;
+          qa['t'+i].a = 'Answer ' + i;
+          qa['t'+i].used = false;
+        }
+        // keep current questionCount and config
+        persistState();
+        renderBoard();
+        buildWheel();
+        populateEditor();
+        alert('All questions were reset to defaults.');
       };
     }
 
