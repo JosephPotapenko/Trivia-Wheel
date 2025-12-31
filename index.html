@@ -113,7 +113,7 @@
 <body>
   <header>
     <div style="position:relative;display:flex;align-items:center;gap:0">
-      <img src="chatgpt.png" alt="Sticker" style="width:300px;height:300px;object-fit:contain;display:block;margin:0;padding:0;position:absolute;left:-160px;top:0;transform:translateY(-6px)" />
+      <img src="chatgpt3.png" alt="Sticker" style="width:300px;height:300px;object-fit:contain;display:block;margin:0;padding:0;position:absolute;left:-160px;top:0;transform:translateY(-6px)" />
     </div>
     <div class="actions" style="transform:translateX(150px)">
       <button class="btn secondary" id="editBtn">Edit</button>
@@ -628,8 +628,8 @@
         <button class="btn" id="applyConfig">Apply</button>
       </div>
       <div class="row" style="justify-content:flex-start">
-        <button class="btn secondary" id="importTxtBtn">Import from text file</button>
-        <span style="font-size:12px;color:var(--sub)">Format: one line per question||answer</span>
+        <button class="btn secondary" id="importTxtBtn">Import submissions</button>
+        <span style="font-size:12px;color:var(--sub)">Reads assets/stories.txt (one line per question||answer)</span>
       </div>
       <div class="qa" id="qaList"></div>
       <div class="row" style="justify-content:flex-end">
@@ -652,7 +652,7 @@
     const saveAll = editor.querySelector('#saveAll');
     const closeEditor = editor.querySelector('#closeEditor');
     const importTxtBtn = editor.querySelector('#importTxtBtn');
-    if(importTxtBtn){ importTxtBtn.onclick = importQAFromFile; }
+    if(importTxtBtn){ importTxtBtn.onclick = importQAFromRepo; }
 
     function populateEditor(){
       qaList.innerHTML='';
@@ -661,6 +661,36 @@
         row.innerHTML = `<div>Q${i}</div><textarea class="q">${qa['t'+i].q}</textarea><textarea class="a">${qa['t'+i].a}</textarea>`;
         row.dataset.id = 't'+i;
         qaList.appendChild(row);
+      }
+    }
+
+    async function importQAFromRepo(){
+      try{
+        const res = await fetch('assets/stories.txt', { cache: 'no-store' });
+        if(!res.ok){ alert('No submissions file found at assets/stories.txt'); return; }
+        const text = await res.text();
+        const items = parseQAFromText(text);
+        questionCount = Math.min(40, Math.max(1, items.length));
+        for(let i=1;i<=40;i++){
+          const it = items[i-1];
+          if(it){
+            qa['t'+i].q = it.q || ('Question ' + i);
+            qa['t'+i].a = (typeof it.a === 'string' ? it.a : '') || ('Answer ' + i);
+            qa['t'+i].used = false;
+          } else {
+            qa['t'+i].q = 'Question ' + i;
+            qa['t'+i].a = 'Answer ' + i;
+            qa['t'+i].used = true;
+          }
+        }
+        persistState();
+        renderBoard();
+        buildWheel();
+        renderTeams();
+        try{ if(editor && editor.style.display==='block') populateEditor(); }catch(e){}
+        alert('Questions imported from repository: ' + items.length);
+      }catch(e){
+        alert('Failed to import: ' + (e && e.message ? e.message : 'unknown error'));
       }
     }
     function toggleEditor(){

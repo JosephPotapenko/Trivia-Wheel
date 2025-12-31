@@ -183,6 +183,17 @@
 
     // No per-person lock: allow repeated submissions
 
+    async function saveStoryToRepo(line){
+      try{
+        const res = await fetch('/api/submit-story', {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: line
+        });
+        return res.ok;
+      }catch(e){ return false; }
+    }
+
     submitBtn.addEventListener('click', async ()=>{
       if(submitBtn.classList.contains('disabled')) return;
       const story = storyEl.value.trim();
@@ -191,12 +202,13 @@
       if(!name){ alert('Please enter your name.'); return; }
       submitBtn.textContent = 'Processing…'; submitBtn.classList.add('disabled');
       const sanitized = await sanitizeStory(story, name);
-      // Append to local aggregated text store (to be exported later)
       const line = `Q||${sanitized}\n`;
-      try{
-        const prev = localStorage.getItem('twSubmissionsText') || '';
-        localStorage.setItem('twSubmissionsText', prev + line);
-      }catch(e){}
+      const ok = await saveStoryToRepo(line);
+      if(!ok){
+        alert('Could not save to repository. Is the server running?');
+        submitBtn.textContent = 'Submit'; submitBtn.classList.remove('disabled');
+        return;
+      }
       alert('Your story has been submitted.');
       location.reload();
     });
