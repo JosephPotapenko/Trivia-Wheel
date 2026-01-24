@@ -1,0 +1,83 @@
+/* Base Theme */
+:root{
+  --bg:#f4f7fb;
+  --card:#b6e1fccb;
+  --muted:#e7edf5;
+  --text:#398fc4;
+  --text-shadow:0 0 100px rgb(27,72,77);
+  --sub:#22667b;
+  --accent:#ffffff;
+  --accent-2:#4fb3ff;
+  --ok:#2fbf71;
+  --bad:#e15757;
+  --border:#002c5c;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Baloo 2', Inter, system-ui, Arial;color:var(--text);background-image:url('../../105.jpg');background-size:cover;background-position:center;background-repeat:no-repeat}
+body{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px}
+
+/* Header */
+header{width:min(1100px,96%);display:flex;align-items:center;justify-content:space-between;margin:0;padding:0}
+.header-left{display:flex;flex-direction:column;gap:2px}
+.title{font-weight:900;letter-spacing:-0.02em;font-size:clamp(22px,4vw,32px)}
+.sub{color:var(--sub);font-weight:600}
+.actions{display:flex;gap:6px;margin-left:auto;justify-content:flex-end}
+.btn{appearance:none;border:none;border-radius:10px;padding:10px 14px;font-weight:800;color:#ffffff;background:var(--accent);cursor:pointer}
+.btn.secondary{background:var(--muted);color:var(--text);border:1px solid var(--border)}
+
+/* Spin button */
+#spinBtn{min-width:320px;width:60%;max-width:520px;padding:14px 28px;border-radius:12px;position:relative;overflow:hidden}
+#spinBtn::before{content:"";position:absolute;inset:-2px;border-radius:14px;box-shadow:0 0 22px 6px rgba(110,192,255,0.35);pointer-events:none}
+#spinBtn{background:linear-gradient(180deg,#eaf6ff,#d8f0ff);color:#0b3a5c}
+#spinBtn span{background:linear-gradient(90deg,#2d7dd2,#4fb3ff,#2d7dd2);-webkit-background-clip:text;background-clip:text;color:transparent;animation:hueShift 3s linear infinite;display:inline-block;font-weight:800}
+@keyframes hueShift{0%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(45deg)}100%{filter:hue-rotate(0deg)}}
+
+/* Layout */
+.board-wrap{width:min(950px,96%);margin-top:0;overflow:visible}
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;background:linear-gradient(180deg,#abf1ff,hsl(190, 100%, 88%));padding:16px;border-radius:16px;border:1px solid var(--border)}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;border-radius:12px;background:linear-gradient(180deg,#ffffff,#f3f8ff);border:1px solid var(--border);cursor:pointer;transition:transform .12s ease,border-color .12s ease,opacity .2s}
+.tile:hover{transform:translateY(-2px);border-color:#a6d5ff}
+.tile.disabled{opacity:.4;cursor:not-allowed}
+.tile .label{font-family:"Baloo 2", cursive;font-weight:800}
+.tile .points{font-family:"Baloo 2", cursive;color:var(--sub);font-weight:800}
+
+/* Overlay card */
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,0.65);backdrop-filter:saturate(110%) blur(6px);z-index:20}
+.card{width:min(760px,92vw);background:linear-gradient(180deg,#ffffff,#f6fbff);border:1px solid var(--border);border-radius:16px;box-shadow:0 30px 100px rgba(23,43,77,.12);padding:20px;display:flex;flex-direction:column;gap:12px}
+.turn{color:var(--sub);font-weight:700}
+.qtext{font-family:"Baloo 2", cursive;font-size:22px;font-weight:800}
+.atext{font-family:"Baloo 2", cursive;font-size:20px;font-weight:800;color:var(--accent-2);display:none}
+.atext.show{display:block}
+.controls{display:flex;gap:8px;justify-content:flex-end}
+.btn.ghost{background:transparent;border:1px solid #55a7ff;color:var(--text)}
+.btn.ok{background:var(--ok)}
+.btn.bad{background:var(--bad)}
+
+/* Teams */
+.teams{width:min(1000px,96%);display:flex;gap:14px;margin-top:18px}
+.team{flex:1;background:linear-gradient(180deg,#ffffff,#7be0ff);border:1px solid var(--border);border-radius:10px;padding:8px}
+.team h3{margin:0 0 6px 0;font-size:14px;color:var(--sub)}
+.score{font-family:"Baloo 2", cursive;font-size:22px;font-weight:900;color:var(--accent);border-radius:8px;padding:4px 6px;cursor:text}
+.team.current{outline:2px solid #ffffff}
+.members .btn{font-size:12px;padding:6px 8px}
+.members-body input{border:1px solid var(--border);border-radius:8px}
+
+/* Editor */
+.editor{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1000px,96vw);max-height:86vh;overflow:auto;background:linear-gradient(180deg,#ffffff,#f6fbff);border:1px solid var(--border);border-radius:16px;padding:18px;display:none;z-index:30}
+.editor h4{margin:0 0 10px 0;font-size:20px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.row input{background:#ffffff;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px}
+.qa{display:flex;flex-direction:column;gap:10px}
+.qa .item{display:grid;grid-template-columns:80px 1fr 1fr;gap:10px}
+.qa textarea{background:#ffffff;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:10px;min-height:80px}
+
+/* Wheel arrow indicator */
+.wheel-wrap::before{content:"◀";position:absolute;top:50%;right:5px;transform:translateY(-50%);font-size:36px;color:var(--accent-2);z-index:10;font-weight:900}
+
+/* Wheel scene */
+.scene{width:min(720px,92vw);height:calc(min(720px,92vw) - 24px);perspective:1200px;position:relative;margin:0;padding:0}
+.cylinder{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 2.8s cubic-bezier(.08,.9,.18,1)}
+.spin-cta{position:absolute;left:50%;transform:translateX(-50%);bottom:-12px;z-index:15;display:flex;justify-content:center;width:100%}
+
+/* Toast & confetti animation */
+@keyframes fall{to{transform:translateY(calc(100vh + 100px)) rotate(360deg);opacity:0}}

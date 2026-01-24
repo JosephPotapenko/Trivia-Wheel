@@ -1,6 +1,6 @@
 # Trivia-Wheel
 
-Minimal modern trivia game with a wheel-based UI.
+Minimal modern trivia game with a clean, wheel-based UI.
 
 ## Client-Only Save + Import
 
@@ -32,8 +32,49 @@ No server required. Submissions are stored in the browser’s localStorage and i
 
 Open [story.html](story.html) directly. Submissions persist per browser via localStorage.
 
+## Server Export (optional)
+
+If you want to persist submitted stories into the repository file [assets/data/stories.txt](assets/data/stories.txt):
+
+1. Start the local server:
+
+```bash
+python3 server.py
+```
+
+2. Visit `http://127.0.0.1:8000/story.html` and click “Export to Server”. This writes all locally stored submissions to `assets/data/stories.txt`.
+3. In the game editor, “Import submissions” will attempt to fetch processed stories from the server (`/api/import`) when available. If the server is unreachable, the game falls back to localStorage import.
+
+## Project Structure
+
+```
+Trivia-Wheel/
+├─ index.html               # Main game (uses assets/css/main.css, assets/js/app.js)
+├─ story.html               # Story submission page (uses assets/css/story.css, assets/js/story.js)
+├─ server.py                # Local server (/api/submit, /api/import, /api/export-submissions)
+├─ assets/
+│  ├─ css/
+│  │  ├─ main.css          # Game styles
+│  │  └─ story.css         # Story page styles
+│  ├─ js/
+│  │  ├─ app.js            # Game logic
+│  │  └─ story.js          # Story page logic
+│  ├─ img/
+│  │  ├─ 105.jpg           # Optional background
+│  │  └─ favicon.svg       # Minimal trivia wheel favicon
+│  ├─ audio/               # Backtracks and sfx
+│  └─ data/
+│     └─ stories.txt       # Exported submissions (server-managed)
+└─ README.md
+```
+3. New submissions will also attempt to sync to the server automatically; if the server isn’t running, they remain in localStorage and can be exported later.
+
 ## Features
 
+- Clean, structured assets and code
+- Minimal SVG favicon (trivia wheel)
 - Wheel spin with animated tick sound
 - Editable questions/answers and configuration
 - Team scores with simple editing
+ - Team member lists per team with collapsible editor
+ - Spin avoids questions matching team member names when possible
