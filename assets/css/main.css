@@ -1,24 +1,24 @@
 /* Base Theme */
 :root{
   --bg:#f4f7fb;
-  --card:#b6e1fccb;
-  --muted:#e7edf5;
-  --text:#398fc4;
-  --text-shadow:0 0 100px rgb(27,72,77);
-  --sub:#22667b;
+  --card:#fff3cf;
+  --muted:#fff0c2;
+  --text:#8a5a00;
+  --text-shadow:0 0 100px rgb(77,52,0);
+  --sub:#6f4700;
   --accent:#ffffff;
-  --accent-2:#4fb3ff;
+  --accent-2:#d49a00;
   --ok:#2fbf71;
   --bad:#e15757;
-  --border:#002c5c;
+  --border:#6b4300;
 }
 *,*::before,*::after{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:'Baloo 2', Inter, system-ui, Arial;color:var(--text);background-image:url('../../105.jpg');background-size:cover;background-position:center;background-repeat:no-repeat}
+html,body{height:100%;margin:0;font-family:'Baloo 2', Inter, system-ui, Arial;color:var(--text);background-image:url('../../Graduation.png');background-size:cover;background-position:center;background-repeat:no-repeat}
 body{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px}
 
 /* Header */
 header{width:min(1100px,96%);display:flex;align-items:center;justify-content:space-between;margin:0;padding:0}
-.header-left{display:flex;flex-direction:column;gap:2px}
+.header-left{display:flex;flex-direction:column;gap:2px; margin-left: 100px;}
 .title{font-weight:900;letter-spacing:-0.02em;font-size:clamp(22px,4vw,32px)}
 .sub{color:var(--sub);font-weight:600}
 .actions{display:flex;gap:6px;margin-left:auto;justify-content:flex-end}
@@ -27,16 +27,16 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
 
 /* Spin button */
 #spinBtn{min-width:320px;width:60%;max-width:520px;padding:14px 28px;border-radius:12px;position:relative;overflow:hidden}
-#spinBtn::before{content:"";position:absolute;inset:-2px;border-radius:14px;box-shadow:0 0 22px 6px rgba(110,192,255,0.35);pointer-events:none}
-#spinBtn{background:linear-gradient(180deg,#eaf6ff,#d8f0ff);color:#0b3a5c}
-#spinBtn span{background:linear-gradient(90deg,#2d7dd2,#4fb3ff,#2d7dd2);-webkit-background-clip:text;background-clip:text;color:transparent;animation:hueShift 3s linear infinite;display:inline-block;font-weight:800}
+#spinBtn::before{content:"";position:absolute;inset:-2px;border-radius:14px;box-shadow:0 0 22px 6px rgba(212,154,0,0.38);pointer-events:none}
+#spinBtn{background:linear-gradient(180deg,#fff8df,#ffe8a3);color:#5f3b00}
+#spinBtn span{background:linear-gradient(90deg,#9f6b00,#d49a00,#9f6b00);-webkit-background-clip:text;background-clip:text;color:transparent;animation:hueShift 3s linear infinite;display:inline-block;font-weight:800}
 @keyframes hueShift{0%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(45deg)}100%{filter:hue-rotate(0deg)}}
 
 /* Layout */
 .board-wrap{width:min(950px,96%);margin-top:0;overflow:visible}
 .board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;background:linear-gradient(180deg,#abf1ff,hsl(190, 100%, 88%));padding:16px;border-radius:16px;border:1px solid var(--border)}
 .tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px;border-radius:12px;background:linear-gradient(180deg,#ffffff,#f3f8ff);border:1px solid var(--border);cursor:pointer;transition:transform .12s ease,border-color .12s ease,opacity .2s}
-.tile:hover{transform:translateY(-2px);border-color:#a6d5ff}
+.tile:hover{transform:translateY(-2px);border-color:#7d8084}
 .tile.disabled{opacity:.4;cursor:not-allowed}
 .tile .label{font-family:"Baloo 2", cursive;font-weight:800}
 .tile .points{font-family:"Baloo 2", cursive;color:var(--sub);font-weight:800}
@@ -55,7 +55,7 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
 
 /* Teams */
 .teams{width:min(1000px,96%);display:flex;gap:14px;margin-top:18px}
-.team{flex:1;background:linear-gradient(180deg,#ffffff,#7be0ff);border:1px solid var(--border);border-radius:10px;padding:8px}
+.team{flex:1;background:linear-gradient(180deg,#ffffff,#ffe29a);border:1px solid var(--border);border-radius:10px;padding:8px}
 .team h3{margin:0 0 6px 0;font-size:14px;color:var(--sub)}
 .score{font-family:"Baloo 2", cursive;font-size:22px;font-weight:900;color:var(--accent);border-radius:8px;padding:4px 6px;cursor:text}
 .team.current{outline:2px solid #ffffff}
@@ -81,3 +81,21 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
 
 /* Toast & confetti animation */
 @keyframes fall{to{transform:translateY(calc(100vh + 100px)) rotate(360deg);opacity:0}}
+
+.floating-logo{
+  position:fixed;
+
+  /* CHANGE THESE VALUES TO MOVE THE LOGO */
+  right:90px;
+  top:50%;
+
+  transform:translateY(-50%);
+
+  z-index:100;
+}
+
+.floating-logo img{
+  width:500px;
+  height:500px;
+  object-fit:contain;
+}

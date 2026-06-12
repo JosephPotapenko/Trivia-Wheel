@@ -846,9 +846,75 @@ if(clearQuestionsBtn){
 function playCorrect(){}
 function playWrong(){}
 
+async function loadRepoQuestionsIfNeeded(){
+  try{
+    if(localStorage.getItem('twQA')) return;
+
+    const res = await fetch('assets/data/questions.json', { cache: 'no-store' });
+    if(!res.ok) return;
+
+    const items = await res.json();
+    if(!Array.isArray(items) || !items.length) return;
+
+    questionCount = Math.min(40, items.length);
+
+    for(let i=1;i<=40;i++){
+      const item = items[i - 1];
+
+      if(item){
+        qa['t' + i].q = item.q || ('Question ' + i);
+        qa['t' + i].a = item.a || ('Answer ' + i);
+        qa['t' + i].used = false;
+      } else {
+        qa['t' + i].q = 'Question ' + i;
+        qa['t' + i].a = 'Answer ' + i;
+        qa['t' + i].used = true;
+      }
+    }
+  }catch(e){}
+}
+
+/* Auto-start background music immediately */
+const musicTracks = [
+  document.getElementById('backtrack1'),
+  document.getElementById('backtrack2'),
+  document.getElementById('backtrack3')
+].filter(Boolean);
+
+let currentMusic = null;
+
+function startBackgroundMusic(){
+  if(!musicTracks.length) return;
+
+  if(currentMusic && !currentMusic.paused) return;
+
+  currentMusic = musicTracks[0];
+
+  currentMusic.volume = 0.45;
+  currentMusic.currentTime = 2; // change to 1 or 2 if your file has silence
+  currentMusic.loop = true;
+
+  currentMusic.play().catch(() => {
+    document.addEventListener('click', startBackgroundMusic, { once:true });
+    document.addEventListener('keydown', startBackgroundMusic, { once:true });
+  });
+}
+
+window.addEventListener('load', () => {
+  musicTracks.forEach(track => {
+    track.preload = 'auto';
+    track.load();
+  });
+
+  startBackgroundMusic();
+});
+
 /* Init */
-loadState();
-updateLanguageUI();
-buildWheel();
-renderBoard();
-renderTeams();
+(async function init(){
+  loadState();
+  await loadRepoQuestionsIfNeeded();
+  updateLanguageUI();
+  buildWheel();
+  renderBoard();
+  renderTeams();
+})();

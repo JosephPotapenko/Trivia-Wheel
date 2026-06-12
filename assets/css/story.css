@@ -1,7 +1,7 @@
 /* Story Page Styles */
 :root{
-  --bg:#f4f7fb; --card:#ffffff; --muted:#e7edf5;
-  --text:#205b7a; --sub:#3d738d; --accent:#4fb3ff; --border:#0a2c45;
+  --bg:#f4f7fb; --card:#ffffff; --muted:#fff0c2;
+  --text:#8a5a00; --sub:#6f4700; --accent:#d49a00; --border:#6b4300;
   --ok:#2fbf71; --bad:#e15757;
 }
 *,*::before,*::after{box-sizing:border-box}
