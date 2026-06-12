@@ -1,19 +1,19 @@
 [
   {
-    "q": "Question 1 goes here",
-    "a": "Answer 1 goes here"
+    "q": "What is Joseph's Major?",
+    "a": "Computer Science"
   },
   {
-    "q": "Question 2 goes here",
-    "a": "Answer 2 goes here"
+    "q": "Name only one of Joseph's minors(1 out of 2):",
+    "a": "Answer will be provided."
   },
     {
-    "q": "Question 1 goes here",
-    "a": "Answer 1 goes here"
+    "q": "Name only one of Joseph's minors(2 out of 2):",
+    "a": "Answer will be provided."
   },
   {
-    "q": "Question 2 goes here",
-    "a": "Answer 2 goes here"
+    "q": "How many degrees does Joseph have?",
+    "a": "2- BSCS and AA-DTA"
   },
     {
     "q": "Question 1 goes here",

@@ -846,34 +846,41 @@ if(clearQuestionsBtn){
 function playCorrect(){}
 function playWrong(){}
 
-async function loadRepoQuestionsIfNeeded(){
+async function loadRepoQuestions(){
   try{
-    if(localStorage.getItem('twQA')) return;
+    const res = await fetch(`/assets/data/questions.json?v=${Date.now()}`, {
+      cache: 'no-store'
+    });
 
-    const res = await fetch('assets/data/questions.json', { cache: 'no-store' });
-    if(!res.ok) return;
+    if(!res.ok){
+      console.error('Could not load questions.json');
+      return;
+    }
 
     const items = await res.json();
-    if(!Array.isArray(items) || !items.length) return;
+
+    if(!Array.isArray(items)){
+      console.error('questions.json must be an array');
+      return;
+    }
 
     questionCount = Math.min(40, items.length);
 
-    for(let i=1;i<=40;i++){
+    for(let i = 1; i <= 40; i++){
       const item = items[i - 1];
 
-      if(item){
-        qa['t' + i].q = item.q || ('Question ' + i);
-        qa['t' + i].a = item.a || ('Answer ' + i);
-        qa['t' + i].used = false;
-      } else {
-        qa['t' + i].q = 'Question ' + i;
-        qa['t' + i].a = 'Answer ' + i;
-        qa['t' + i].used = true;
-      }
+      qa['t' + i] = {
+        q: item?.q || `Question ${i}`,
+        a: item?.a || `Answer ${i}`,
+        used: false
+      };
     }
-  }catch(e){}
-}
 
+    saveState();
+  }catch(err){
+    console.error('Error loading questions.json:', err);
+  }
+}
 /* Auto-start background music immediately */
 const musicTracks = [
   document.getElementById('backtrack1'),
@@ -911,8 +918,8 @@ window.addEventListener('load', () => {
 
 /* Init */
 (async function init(){
-  loadState();
-  await loadRepoQuestionsIfNeeded();
+  await loadRepoQuestions();
+
   updateLanguageUI();
   buildWheel();
   renderBoard();
