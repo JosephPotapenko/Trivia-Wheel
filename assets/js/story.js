@@ -37,21 +37,25 @@ submitBtn.addEventListener('click', async () => {
   try {
     const response = await fetch('/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
       body: formData.toString()
     });
 
-    if (!response.ok) throw new Error('Submit failed');
+    if (!response.ok) {
+      throw new Error('Submit failed');
+    }
 
     storyInput.value = '';
     nameInput.value = '';
 
     alert('Your question has been submitted.');
   } catch (error) {
-    alert('Could not submit. Make sure this is deployed on Netlify.');
+    alert('Could not submit. Check Netlify Forms in your dashboard and make sure the latest deploy finished.');
   }
 });
 
 exportBtn.addEventListener('click', () => {
-  alert('Go to Netlify Dashboard → Forms → story-submissions to view/export questions.');
+  alert('Go to Netlify Dashboard → Forms → story-submissions to view or export questions.');
 });

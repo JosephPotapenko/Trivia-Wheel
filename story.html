@@ -3,19 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Share Your Story</title>
+  <title>Ask A Question</title>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/story.css" />
 </head>
+
 <body>
   <div class="wrap">
     <header>
       <div>
-          <div class="title" id="titleText">Ask A Question</div>
-          <div class="sub" id="subText">One question at a time. But be careful! You may end up answering it!</div>
+        <div class="title" id="titleText">Ask A Question</div>
+        <div class="sub" id="subText">One question at a time. But be careful! You may end up answering it!</div>
       </div>
     </header>
 
@@ -24,22 +25,26 @@
         <label for="story" id="storyLabel">Ask a question… (the more interesting the better)</label>
         <textarea id="story" placeholder="Ask a question." autocomplete="off"></textarea>
       </div>
+
       <div class="row">
-          <label for="name" id="nameLabel">Submit your name…</label>
-          <input id="name" type="text" placeholder="Submit your name..." autocomplete="off" />
+        <label for="name" id="nameLabel">Submit your name…</label>
+        <input id="name" type="text" placeholder="Submit your name..." autocomplete="off" />
       </div>
+
       <div class="actions" style="margin-top:12px">
-          <button id="submitBtn" class="btn">Submit</button>
-          <button id="exportBtn" class="btn secondary">Export to Server</button>
+        <button id="submitBtn" class="btn" type="button">Submit</button>
+        <button id="exportBtn" class="btn secondary" type="button">Export is in Netlify</button>
       </div>
     </div>
-    
   </div>
 
+  <form name="story-submissions" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="hidden" name="form-name" value="story-submissions" />
+    <input name="bot-field" />
+    <input type="text" name="question" />
+    <input type="text" name="name" />
+  </form>
+
   <script src="assets/js/story.js"></script>
-  <form name="story-submissions" netlify hidden>
-  <input type="text" name="question" />
-  <input type="text" name="name" />
-</form>
 </body>
 </html>
