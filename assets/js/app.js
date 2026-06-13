@@ -30,7 +30,7 @@ const spinBtn = document.getElementById('spinBtn');
 const questionNumber = document.getElementById('questionNumber');
 
 // Language mode: Russian-only when true, English-only when false
-let ruMode = true;
+let ruMode = false;
 function lang(en, ru){ return ruMode ? ru : en; }
 
 function parseQAFromText(text){

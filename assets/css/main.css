@@ -1,19 +1,19 @@
 /* Base Theme */
 :root{
-  --bg:#f4f7fb;
-  --card:#fff3cf;
-  --muted:#fff0c2;
-  --text:#8a5a00;
+  --bg:#03e4ec;
+  --card:#1aff00;
+  --muted:#ffffff;
+  --text:#03e4ec;
   --text-shadow:0 0 100px rgb(77,52,0);
-  --sub:#6f4700;
-  --accent:#ffffff;
-  --accent-2:#d49a00;
+  --sub:#03e4ec;
+  --accent:hsl(0, 0%, 100%);
+  --accent-2:#e15757;
   --ok:#2fbf71;
   --bad:#e15757;
-  --border:#6b4300;
+  --border:#47ffe7;
 }
 *,*::before,*::after{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:'Baloo 2', Inter, system-ui, Arial;color:var(--text);background-image:url('../../Graduation.png');background-size:cover;background-position:center;background-repeat:no-repeat}
+html,body{height:100%;margin:0;font-family:'Baloo 2', Inter, system-ui, Arial;color:var(--text);background-image:url('../../background.png');background-size:cover;background-position:center;background-repeat:no-repeat}
 body{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px}
 
 /* Header */
@@ -28,8 +28,8 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
 /* Spin button */
 #spinBtn{min-width:320px;width:60%;max-width:520px;padding:14px 28px;border-radius:12px;position:relative;overflow:hidden}
 #spinBtn::before{content:"";position:absolute;inset:-2px;border-radius:14px;box-shadow:0 0 22px 6px rgba(212,154,0,0.38);pointer-events:none}
-#spinBtn{background:linear-gradient(180deg,#fff8df,#ffe8a3);color:#5f3b00}
-#spinBtn span{background:linear-gradient(90deg,#9f6b00,#d49a00,#9f6b00);-webkit-background-clip:text;background-clip:text;color:transparent;animation:hueShift 3s linear infinite;display:inline-block;font-weight:800}
+#spinBtn{background:linear-gradient(180deg,#fff8df,#c5ebf7);color:#96e2e7}
+#spinBtn span{background:linear-gradient(90deg,#00fb6d,#0090f1,#9000ff);-webkit-background-clip:text;background-clip:text;color:transparent;animation:hueShift 3s linear infinite;display:inline-block;font-weight:800}
 @keyframes hueShift{0%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(45deg)}100%{filter:hue-rotate(0deg)}}
 
 /* Layout */
@@ -55,7 +55,7 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
 
 /* Teams */
 .teams{width:min(1000px,96%);display:flex;gap:14px;margin-top:18px}
-.team{flex:1;background:linear-gradient(180deg,#ffffff,#ffe29a);border:1px solid var(--border);border-radius:10px;padding:8px}
+.team{flex:1;background:linear-gradient(180deg,#2b7cc7,#00937d);border:1px solid var(--border);border-radius:10px;padding:8px}
 .team h3{margin:0 0 6px 0;font-size:14px;color:var(--sub)}
 .score{font-family:"Baloo 2", cursive;font-size:22px;font-weight:900;color:var(--accent);border-radius:8px;padding:4px 6px;cursor:text}
 .team.current{outline:2px solid #ffffff}
@@ -86,7 +86,7 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
   position:fixed;
 
   /* CHANGE THESE VALUES TO MOVE THE LOGO */
-  right:90px;
+  right:85px;
   top:50%;
 
   transform:translateY(-50%);
@@ -95,7 +95,7 @@ header{width:min(1100px,96%);display:flex;align-items:center;justify-content:spa
 }
 
 .floating-logo img{
-  width:500px;
-  height:500px;
+  width:300px;
+  height:300px;
   object-fit:contain;
 }
