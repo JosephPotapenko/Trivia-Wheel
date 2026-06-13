@@ -7,6 +7,8 @@ const nameInput = document.getElementById('name');
 const submitBtn = document.getElementById('submitBtn');
 const exportBtn = document.getElementById('exportBtn');
 
+const API_URL = '/.netlify/functions/story-submissions';
+
 function updateLanguageUI() {
   titleText.textContent = 'Ask A Question';
   subText.textContent = 'One question at a time. But be careful! You may end up answering it!';
@@ -15,51 +17,42 @@ function updateLanguageUI() {
   storyInput.placeholder = 'Ask a question.';
   nameInput.placeholder = 'Submit your name...';
   submitBtn.textContent = 'Submit';
-  exportBtn.textContent = 'Export to Server';
+  exportBtn.textContent = 'Export Questions';
 }
 
 updateLanguageUI();
 
-function getStoredSubmissions() {
-  const possibleKeys = [
-    'storySubmissions',
-    'submissions',
-    'stories',
-    'submittedStories'
-  ];
+async function loadQuestions() {
+  const response = await fetch(API_URL);
 
-  for (const key of possibleKeys) {
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      return JSON.parse(saved);
-    }
+  if (!response.ok) {
+    throw new Error('Could not load questions');
   }
 
-  return [];
+  return await response.text();
 }
 
-function saveStoredSubmissions(submissions) {
-  localStorage.setItem('storySubmissions', JSON.stringify(submissions));
+async function saveQuestions(text) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain'
+    },
+    body: text
+  });
+
+  if (!response.ok) {
+    throw new Error('Could not save questions');
+  }
 }
 
-function getSubmissionsText() {
-  const submissions = getStoredSubmissions();
-
-  return submissions
-    .map((item, index) => {
-      return `${index + 1}. ${item.question}\nName: ${item.name || 'Anonymous'}`;
-    })
-    .join('\n\n');
-}
-
-function downloadSubmissionsFile(text) {
+function downloadTextFile(text) {
   const blob = new Blob([text], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement('a');
   a.href = url;
   a.download = 'stories.txt';
-
   document.body.appendChild(a);
   a.click();
 
@@ -67,55 +60,49 @@ function downloadSubmissionsFile(text) {
   URL.revokeObjectURL(url);
 }
 
-submitBtn.addEventListener('click', () => {
+submitBtn.addEventListener('click', async () => {
   const question = storyInput.value.trim();
-  const name = nameInput.value.trim();
+  const name = nameInput.value.trim() || 'Anonymous';
 
   if (!question) {
     alert('Please enter your question.');
     return;
   }
 
-  const submissions = getStoredSubmissions();
+  try {
+    const existingText = await loadQuestions();
 
-  submissions.push({
-    question,
-    name,
-    submittedAt: new Date().toISOString()
-  });
+    const count = existingText.trim()
+      ? existingText.trim().split(/\n\n+/).length + 1
+      : 1;
 
-  saveStoredSubmissions(submissions);
+    const newEntry = `${count}. ${question}\nName: ${name}`;
+    const updatedText = existingText.trim()
+      ? `${existingText.trim()}\n\n${newEntry}`
+      : newEntry;
 
-  storyInput.value = '';
-  nameInput.value = '';
+    await saveQuestions(updatedText);
 
-  alert('Your question has been submitted.');
+    storyInput.value = '';
+    nameInput.value = '';
+
+    alert('Your question has been submitted.');
+  } catch (error) {
+    alert('Could not save your question. Please try again.');
+  }
 });
 
 exportBtn.addEventListener('click', async () => {
-  const submissionsText = getSubmissionsText();
-
-  if (!submissionsText) {
-    alert('There are no questions to export yet.');
-    return;
-  }
-
   try {
-    const response = await fetch('/api/export-submissions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain'
-      },
-      body: submissionsText
-    });
+    const text = await loadQuestions();
 
-    if (!response.ok) {
-      throw new Error('Export failed');
+    if (!text.trim()) {
+      alert('There are no questions to export yet.');
+      return;
     }
 
-    alert('Questions exported to assets/data/stories.txt');
+    downloadTextFile(text);
   } catch (error) {
-    downloadSubmissionsFile(submissionsText);
-    alert('Server not reachable, so a stories.txt file was downloaded instead.');
+    alert('Could not export questions.');
   }
 });
