@@ -21,7 +21,21 @@ function updateLanguageUI() {
 updateLanguageUI();
 
 function getStoredSubmissions() {
-  return JSON.parse(localStorage.getItem('storySubmissions') || '[]');
+  const possibleKeys = [
+    'storySubmissions',
+    'submissions',
+    'stories',
+    'submittedStories'
+  ];
+
+  for (const key of possibleKeys) {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  }
+
+  return [];
 }
 
 function saveStoredSubmissions(submissions) {
